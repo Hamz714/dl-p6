@@ -8,8 +8,8 @@ git config pull.rebase true
 mkdir -p logs runs exps final
 chmod +x bridge/*.sh
 
-export PATH="$HOME/.local/bin:$HOME/.claude/local:$PATH"
-command -v claude >/dev/null || { echo "Claude Code not found: run  curl -fsSL https://claude.ai/install.sh | bash  then this again"; exit 1; }
+AGENT=$(head -n1 ~/.p6_agent 2>/dev/null)
+[ -x "$AGENT" ] || { echo "~/.p6_agent must hold the absolute path of the agent CLI (ask the reviewer)"; exit 1; }
 nvidia-smi -L || echo "WARNING: no GPU visible on $(hostname) - start the JupyterHub server with a GPU"
 
 if command -v tmux >/dev/null; then

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Practical 6 bridge driver (runs on the NCC GPU node).
 # Waits for the reviewer's next instruction in bridge/inbox/NNN.md (arrives via git pull),
-# runs one headless Claude Code turn with it, saves the reply as bridge/outbox/NNN.md,
+# runs one headless agent turn with it, saves the reply as bridge/outbox/NNN.md,
 # and commits + pushes everything so the reviewer can read it. Repeats forever.
 cd "$(dirname "$0")/.." || exit 1
 B=bridge
 mkdir -p "$B/inbox" "$B/outbox" logs
 source ~/deep_learning/bin/activate 2>/dev/null
-export PATH="$HOME/.local/bin:$HOME/.claude/local:$PATH"
+AGENT=$(head -n1 ~/.p6_agent 2>/dev/null)   # absolute path of the agent CLI, kept outside the repo
 TOPIC=$(cat "$B/ntfy_topic" 2>/dev/null)
 
 log()    { echo "$(date '+%F %T') $*"; }
@@ -45,7 +45,7 @@ while true; do
   SID=$(cat "$B/session_id" 2>/dev/null)
   ARGS=(-p "$(cat "$PROMPT")" --output-format json --dangerously-skip-permissions)
   [ -n "$SID" ] && ARGS+=(--resume "$SID")
-  timeout 8h claude "${ARGS[@]}" > "$B/outbox/$ID.raw.json" 2> "$B/outbox/$ID.stderr.log" &
+  timeout 8h "$AGENT" "${ARGS[@]}" > "$B/outbox/$ID.raw.json" 2> "$B/outbox/$ID.stderr.log" &
   CP=$!
 
   # Heartbeat: push progress every ~5 min; an abort_NNN file from the reviewer stops the turn.

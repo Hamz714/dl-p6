@@ -20,7 +20,7 @@ with well-implemented state-of-the-art methods from recent papers, high-quality 
 ## 2. How you are being run (read carefully)
 
 - You run **headless, one turn at a time**, launched by `bridge/driver.sh`. Each turn's instruction comes from
-  a reviewer (another Claude instance working with Hamzah) as `bridge/inbox/NNN.md`.
+  a reviewer working with Hamzah as `bridge/inbox/NNN.md`.
   Your **final message** of the turn is saved as `bridge/outbox/NNN.md`; the driver commits and pushes the
   whole repo to GitHub, where the reviewer reads it.
 - **Nobody answers questions mid-turn.** Never stop to ask. Take the option you would mark "(Recommended)",
@@ -129,9 +129,7 @@ One "everything known-good" model per task, so the first results are already far
 
 **Stage 5 — final (only when the reviewer says so)**: `final/lab06_final.py` = the winner, cleaned up, with
 at the top: a brief abstract (≤ 8 comment lines, no KID claims needed), references (real papers with year
-and venue/arXiv id), and an **accurate** AI acknowledgement (Claude Code by Anthropic designed, implemented and
-ran the experiments and drafted the abstract; Claude reviewed results and planned the stages; Hamzah
-directed and checked the work). Diff the fixed sections against the starter, then run it **once**, from
+and venue/arXiv id), and an **accurate** AI acknowledgement (the reviewer supplies the exact wording; leave a placeholder). Diff the fixed sections against the starter, then run it **once**, from
 `~/p6/final`, as `python lab06_final.py` so it writes `lab-06-xmzj54.zip`. Report the zip path, KID and hashes.
 
 ## 7. Reference papers you may build on
