@@ -21,6 +21,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 |---|---|---|---|---|---|---|---|---|
 | exp_000_ddpm | ddpm | 120,075 | 4,000 | 3801 | val | 164.3 | 4.2 | starter as-is (finished before turn 001 was stopped; sheet says 220.0) |
 | exp_001–004 | — | — | — | — | — | — | — | killed at the start of turn 002 (plan changed; not needed) |
+| exp_010_ddpm_strong | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | **100.9** (EMA .9998) / 105.0 (.999) / 104.5 (.9995) / 188.6 (.9999) | 29.0 (+3.1 extra EMAs) | strong colour casts (saturated blue/magenta/green tints) |
+| exp_011_flow_strong | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 25.9 (EMA .9998) / 14.7 (.999) / **14.4** (.9995) / 355.3 (.9999) | 28.0 (+1.9 extra EMAs) | .9995: clean, varied horses, natural colours; .9999: noise-textured mush |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -31,7 +33,7 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 
 Estimate per full run (concurrent): compile ~1 min + 20k updates / 11 upd/s ≈ 30 min + 4 EMA evaluations
 (1,000 samples + KID each; DDPM ≈ 2.5 min each, flow ≈ 1.5–2 min each) ≈ **DDPM ~42 min, flow ~38 min**.
-Launched 17:32.
+Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18:00, all EMA scores by 18:05 (DDPM 32 min total, flow 30 min).
 
 ## Decisions
 
@@ -56,4 +58,15 @@ Launched 17:32.
   because LR annealing reduces the need for long averaging. Same network. Task is set to whichever wins Stage 1.
 - `tools/check_fixed.py` diffs the fixed sections of every experiment against the starter (all OK so far).
 
+- Stage 1 → continue with **flow** (14.4 vs 100.9; not a tie). DDPM's failure looks like epsilon-prediction
+  error amplified at the high-noise end of the 100-step cosine schedule (global colour casts); fixable with
+  v/x-prediction inside `forward`, but flow is 7x better now, so the GPU goes to flow (brief §6).
+- EMA 0.9999 / 0.9998 were contaminated by the random initial weights (0.9999^20000 ≈ 13.5 %, 0.9998^20000 ≈ 1.8 %).
+  Fix stacked into exp_012: EMA weight max(1−decay, 1/(step+1)) = running mean until the 1/(1−decay) horizon.
+- exp_012_flow_cosine smoke-tested for 100 updates (13.7 upd/s alone, no errors); not launched (next turn).
+
 ## Stage conclusions
+
+**Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
+30.6 — vs DDPM 100.9 (EMA 0.9998). Shorter EMA (0.999–0.9995) wins under a constant LR; long EMAs were
+broken by init bias (fixed for Stage 2). Flow is the task from here on.

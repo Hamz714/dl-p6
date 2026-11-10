@@ -290,7 +290,7 @@ EXTRA_EMA = {}  # decay -> state_dict of the other tracked EMAs, evaluated separ
 
 
 def train(model, device):
-    """AdamW with linear warm-up then cosine decay to zero, bf16 autocast, torch.compile, horizontal flips and EMA of the weights."""
+    """AdamW with linear warm-up then cosine decay to zero, bf16 autocast, torch.compile, horizontal flips and warm-started EMA of the weights."""
     images, labels = image_data()
     optimiser = torch.optim.AdamW(model.parameters(), lr=CONFIG["learning_rate"], betas=(0.9, 0.99),
                                   weight_decay=CONFIG["weight_decay"])
@@ -317,8 +317,8 @@ def train(model, device):
         optimiser.step()
         scheduler.step()
         with torch.no_grad():
-            for ema, decay in zip(emas, EMA_DECAYS):
-                torch._foreach_lerp_(ema, params, 1 - decay)
+            for ema, decay in zip(emas, EMA_DECAYS):  # running mean until 1/(1-decay) updates: no init bias
+                torch._foreach_lerp_(ema, params, max(1 - decay, 1 / (step + 1)))
         if step == 1 or step % max(1, CONFIG["steps"]//40) == 0 or step == CONFIG["steps"]:
             history.append([step, round(loss.item(), 6)])
         if step == 1 or step % max(1, CONFIG["steps"]//10) == 0 or step == CONFIG["steps"]:
