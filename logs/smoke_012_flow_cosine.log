@@ -1,0 +1,12 @@
+1 / 300: loss 1.2677
+30 / 300: loss 1.1613
+60 / 300: loss 0.9274
+90 / 300: loss 0.5962
+120 / 300: loss 0.3796
+150 / 300: loss 0.3279
+180 / 300: loss 0.3099
+210 / 300: loss 0.2654
+240 / 300: loss 0.2936
+270 / 300: loss 0.2446
+300 / 300: loss 0.2460
+exps/exp_012_flow_cosine.py: compile+first update 76s; steady 6.02 upd/s; 300 updates in 125.3s (incl. compile) -> 2.39 upd/s; peak mem 416 MiB; generate(50) 5.4s; extra EMAs [0.999, 0.9998, 0.9999]; last loss [300, 0.246049]
