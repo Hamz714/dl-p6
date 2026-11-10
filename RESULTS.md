@@ -29,6 +29,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_015_flow_mp | flow | 927,218 (+16 buf) | 20,000 | 3801 | val | 16.2 (EMA .999) / **14.8** (.9995) / 16.0 (.9998) / 21.5 (.9999) | 25.9 (+1.5 extra EMAs) | EDM2 MP U-Net, lr 1e-2 constant; clean, varied, similar to 011 |
 | exp_016_flow_lrtail | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 17.1 (EMA .999) / **15.7** (.9995) / 19.2 (.9998) / 50.1 (.9999) | 30.4 (+1.0 extra EMAs) | 011 + lr 1e-3 constant then linear to 0 over 16k-20k; clean, like 011 |
 | exp_017_flow_mp_isqrt | flow | 927,218 (+16 buf) | 20,000 | 3801 | val | 25.3 (EMA .999) / 24.3 (.9995) / **23.7** (.9998) / 30.9 (.9999) | 28.5 (+1.7 extra EMAs) | 015 + EDM2 1/sqrt(t) decay (T_REF 1500, lr ends 2.7e-3); grainy, dithered textures |
+| exp_018_flow_muon | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **34.2** (EMA .999) / 37.6 (.9995) / 80.0 (.9998) / 223.2 (.9999) | 31.5 (+1.8 extra EMAs) | 011 + MuonAdamW (Muon lr 0.02); muddy, desaturated, noisy textures, broken shapes |
+| exp_019_flow_dropout | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **14.4** (EMA .999) / 14.5 (.9995) / 20.1 (.9998) / 45.5 (.9999) | 31.7 (+1.7 extra EMAs) | 011 + dropout 0.1 before conv2; clean, varied, slightly smoother than 011 |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -154,6 +156,14 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   (git-ignored), for offline diagnostics only. New tools/sampler_probe.py (analysis only) re-samples saved
   weights with Euler at 25/50/100 steps using the same noise seed and KID code, to measure how much KID the
   fixed 25-step sampler costs. The first runs with saved weights are next turn's (018/019 started earlier).
+- Muon paired losses vs 011 (identical batches): about equal to 6k, then 4-9 % higher from 8k to 18k
+  (e.g. 12k .1818 vs .1661). The 300-update smoke advantage did not last.
+- exp_020_flow_muon_dropout will not be run: neither 018 nor 019 helped, so its condition (both help) failed.
+- Prepared exp_022_flow_muon_rms (not recommended first): 018 with the Liu et al. 2025 update scaling
+  0.2·sqrt(max(rows, cols)), which matches AdamW's update RMS so the Muon group shares the AdamW lr 1e-3, plus
+  weight decay 0.1 on the Muon group. Checked: Muon update RMS = 0.17·lr. Reason: Jordan's lr 0.02 gives
+  updates about 5x AdamW's RMS on these small matrices; this matches 018's drifting weights and collapsed
+  long EMAs.
 
 ## Stage conclusions
 
@@ -184,3 +194,11 @@ grainy textures, though its paired training loss matched 015's. Across 012, 016 
 reduction gave equal or worse KID at equal or lower loss: on this budget, EMA over a constant-LR trajectory
 beats annealing. Decay is dropped. The open question is the opposite direction (a higher constant LR, 019),
 plus the optimiser (Muon, 018). Incumbent unchanged: exp_011 (14.4).
+
+**Stage 5 (turn 006).** Muon (018) was clearly worse (34.2 vs 14.4) with muddy samples. Its long EMAs collapsed
+(80, 223), i.e. the weights were still moving fast at the end, consistent with update steps about 5x
+AdamW-sized. Dropout 0.1 (019) tied the incumbent exactly (14.4 at EMA .999) with slightly smoother samples;
+on a tie the simpler option wins, so no dropout. Incumbent unchanged: exp_011 (14.4). Now 015 (MP net),
+016 (LR tail) and 019 (dropout) all landed at 14.4-15.7 whatever their training loss; this looks like a
+floor. Prime suspect: the fixed 25-step Euler sampler, plus about +-2 KID of 1,000-sample noise. The
+sampler probe will measure it on the next run's saved weights.
