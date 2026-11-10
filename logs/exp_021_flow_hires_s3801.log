@@ -16,3 +16,9 @@
 21:55:48 }
 21:55:48 Submission: /home3/xmzj54/p6/runs/exp_021_flow_hires_s3801_validation.zip
 21:55:48 RESULT {"exp": "exp_021_flow_hires", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 16.016, "params": 958179, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.3, "finished": "2026-11-10 21:55:48"}
+21:56:11 KID x 1000: 15.630
+21:56:11 RESULT {"exp": "exp_021_flow_hires", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 15.63, "params": 958179, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.6, "finished": "2026-11-10 21:56:11"}
+21:56:31 KID x 1000: 21.719
+21:56:31 RESULT {"exp": "exp_021_flow_hires", "seed": 3801, "split": "validation", "tag": "ema0.9998", "kid1000": 21.719, "params": 958179, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 34.0, "finished": "2026-11-10 21:56:31"}
+21:56:52 KID x 1000: 35.717
+21:56:52 RESULT {"exp": "exp_021_flow_hires", "seed": 3801, "split": "validation", "tag": "ema0.9999", "kid1000": 35.717, "params": 958179, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 34.3, "finished": "2026-11-10 21:56:52"}
