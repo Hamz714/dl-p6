@@ -8,3 +8,11 @@
 23:30:16 14000 / 20000: loss 0.1918
 23:36:26 16000 / 20000: loss 0.2002
 23:42:37 18000 / 20000: loss 0.1733
+23:48:48 20000 / 20000: loss 0.1840
+23:49:57 KID x 1000: 16.349
+23:49:58 {
+23:49:58   "kid": 0.016348600387573242,
+23:49:58   "samples": 1000
+23:49:58 }
+23:49:58 Submission: /home3/xmzj54/p6/runs/exp_027_flow_convnext_s3801_validation.zip
+23:49:58 RESULT {"exp": "exp_027_flow_convnext", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 16.349, "params": 935691, "buffers": 24, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 63.4, "finished": "2026-11-10 23:49:57"}
