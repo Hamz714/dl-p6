@@ -24,7 +24,8 @@ start = time.time()
 result = ns["run"](out=str(out), seed=args.seed, split=args.split, show=False)
 minutes = (time.time() - start) / 60
 
-row = dict(exp=exp.stem, seed=args.seed, split=args.split, tag=args.tag,
+ema = ns.get("EMA_DECAYS", (None,))[0]
+row = dict(exp=exp.stem, seed=args.seed, split=args.split, tag=args.tag or (f"ema{ema}" if ema else ""),
            kid1000=round(1000 * result["metrics"]["kid"], 3),
            params=result["parameters"], buffers=result["buffer_elements"],
            config=result["config"], minutes=round(minutes, 1),
@@ -33,3 +34,17 @@ Path("runs").mkdir(exist_ok=True)
 with open("runs/index.jsonl", "a") as f:
     f.write(json.dumps(row) + "\n")
 print("RESULT", json.dumps(row), flush=True)
+
+# Extra EMA decays tracked by train() (EXTRA_EMA = {decay: state_dict}): score each with the fixed
+# image_score()/generate() into its own folder; logged as extra rows tagged ema<decay>.
+for decay, state in ns.get("EXTRA_EMA", {}).items():
+    model = ns["build_model"]().to(device := "cuda" if ns["torch"].cuda.is_available() else "cpu")
+    model.load_state_dict(state)
+    folder = out / f"ema{decay}"
+    folder.mkdir(parents=True, exist_ok=True)
+    metrics = ns["image_score"](model, folder, device, args.split)
+    extra = dict(row, tag=f"ema{decay}", kid1000=round(1000 * metrics["kid"], 3),
+                 minutes=round((time.time() - start) / 60, 1), finished=time.strftime("%Y-%m-%d %H:%M:%S"))
+    with open("runs/index.jsonl", "a") as f:
+        f.write(json.dumps(extra) + "\n")
+    print("RESULT", json.dumps(extra), flush=True)
