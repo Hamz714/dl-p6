@@ -1,0 +1,12 @@
+1 / 200: loss 1.2677
+20 / 200: loss 1.2376
+40 / 200: loss 1.1677
+60 / 200: loss 1.0845
+80 / 200: loss 0.9578
+100 / 200: loss 0.7952
+120 / 200: loss 0.6445
+140 / 200: loss 0.4977
+160 / 200: loss 0.4357
+180 / 200: loss 0.3778
+200 / 200: loss 0.3147
+exps/exp_011_flow_strong.py: compile+first update 55s; steady 11.11 upd/s; 200 updates in 72.7s (incl. compile) -> 2.75 upd/s; peak mem 416 MiB; generate(50) 3.6s; extra EMAs [0.999, 0.9995, 0.9999]; last loss [200, 0.314683]

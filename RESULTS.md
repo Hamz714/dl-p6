@@ -22,6 +22,17 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_000_ddpm | ddpm | 120,075 | 4,000 | 3801 | val | 164.3 | 4.2 | starter as-is (finished before turn 001 was stopped; sheet says 220.0) |
 | exp_001–004 | — | — | — | — | — | — | — | killed at the start of turn 002 (plan changed; not needed) |
 
+## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
+
+| exp | compile + 1st update | steady speed | peak GPU mem | generate(50) | loss @200 |
+|---|---|---|---|---|---|
+| exp_010_ddpm_strong | 54 s | 11.1 upd/s | 416 MiB | 5.4 s (100 steps) | 0.102 |
+| exp_011_flow_strong | 55 s | 11.1 upd/s | 416 MiB | 3.6 s (25 steps) | 0.315 |
+
+Estimate per full run (concurrent): compile ~1 min + 20k updates / 11 upd/s ≈ 30 min + 4 EMA evaluations
+(1,000 samples + KID each; DDPM ≈ 2.5 min each, flow ≈ 1.5–2 min each) ≈ **DDPM ~42 min, flow ~38 min**.
+Launched 17:32.
+
 ## Decisions
 
 - Turn 002: killed leftover runs exp_001–004 from turn 001 (baselines come from the sheet).
