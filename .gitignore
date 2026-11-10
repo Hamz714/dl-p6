@@ -1,0 +1,12 @@
+data
+data/
+*.zip
+*.pt
+*.pth
+*.ckpt
+__pycache__/
+.ipynb_checkpoints/
+bridge/.lock
+runs/*/samples/batch-0[2-9].png
+runs/*/samples/batch-10.png
+!final/*.zip
