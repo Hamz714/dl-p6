@@ -8,3 +8,6 @@
 210 / 300: loss 0.2635
 240 / 300: loss 0.2831
 270 / 300: loss 0.2348
+300 / 300: loss 0.2400
+exps/exp_018_flow_muon.py: compile+first update 196s; steady 5.31 upd/s; 300 updates in 252.2s (incl. compile) -> 1.19 upd/s; peak mem 416 MiB; generate(50) 9.4s; extra EMAs [0.999, 0.9998, 0.9999]; last loss [300, 0.239966]
+loss at 300: 0.2400; mean of 15 logged losses after update 200: 0.2561; max 1.2700
