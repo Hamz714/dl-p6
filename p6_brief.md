@@ -84,49 +84,48 @@ functions/classes placed in the model/training sections.
 - Python env: `source ~/deep_learning/bin/activate` (torch-fidelity already installed).
   Data: `~/p6/data` (symlinked to `~/data` if that exists).
 
-## 5. Selection protocol
+## 5. Compute policy and selection protocol (Hamzah's standing order — overrides anything below)
 
-- KID from 1,000 samples is noisy (expect roughly ±2–4 at KID ≈ 30). Screen with seed 3801; anything
-  promoted needs ≥ 3 seeds (3801, 1, 2) and must beat the incumbent by more than the noise.
-- Compare like with like: same number of updates when judging an architecture change.
-- Before the final, confirm the top 2 candidates on 3+ seeds on validation **and** one run on `--split test`.
-- Look at the sample grids: note colour casts, broken legs, repeated images, background quality.
+The GPU is a small MIG slice of an A100 (1g.10gb), so GPU time is the scarcest resource.
+- **Highest expected KID reduction per GPU-minute first, always.** Before launching anything, ask "is this the
+  run most likely to cut KID the most right now?" If not, don't launch it.
+- **No repeats, no reproduction checks, no extra seeds, no test-split checks** unless the reviewer asks.
+  Every run is seed 3801 on validation and tests a new idea.
+- **Stack known-good techniques together** instead of ablating them one at a time; ablate only when a change
+  looks harmful or the result is surprising.
+- Use cheap signals to kill bad runs early: if a run's loss diverges or is clearly worse than the incumbent at
+  the same step, stop it and say so.
+- KID from 1,000 samples is noisy (roughly ±2–4 at KID ≈ 30), so treat differences under ~10% as a tie and
+  prefer the simpler option on ties. Don't spend runs resolving ties.
+- Track several EMA decays inside one training run and evaluate each at the end: one training run, several
+  answers. That counts as one run.
+- Glance at `samples/batch-01.png` for each run and note obvious problems in one line.
 
 ## 6. Research plan
 
 The binding constraint is the **training budget** (20k updates × 64 = 1.28M images ≈ 320 epochs of 4k images),
 far more than the parameter budget. Favour things that converge fast and improve sample quality per update.
 
-**Stage 0 — setup and calibration**
-- Record GPU (`nvidia-smi`), torch / torch-fidelity versions, free memory, CPU count in RESULTS.md.
-- `exp_000_ddpm` and `exp_001_flow`: the starter unchanged except STUDENT_ID (task ddpm / flow).
-  Should reproduce ≈ 220 / ≈ 203. `exp_002_ddpm20k`, `exp_003_flow20k`: same at 20,000 updates.
-- Measure minutes per 1k updates, sampling+KID time, and how many runs fit on the GPU at once.
-  Try bf16 autocast + `torch.compile` on one run for speed (report the speed-up and whether KID is unchanged).
+The baselines are known from the sheet (DDPM 220.0, flow 202.9 at 4k updates) — do **not** re-run them.
 
-**Stage 1 — architecture** (both tasks, 10k updates, no EMA, seed 3801; then 2 more seeds for the top 2)
-Design proper U-Nets at 0.8–1.0M params with a parameter counter. Candidates:
-- A: ADM/DDPM++-style: 32→16→8→4, 2 residual blocks per level, adaptive GroupNorm scale-shift from a
-  sinusoidal time MLP, self-attention at 8×8, skip concatenation, zero-init final conv.
-- B: same with channels shifted towards low resolution (exercise 2 of the sheet), attention at 16×16 and 8×8.
-- C: ConvNeXt-style blocks (depthwise 7×7 + MLP) for more width per parameter.
-- D: simplified EDM2 magnitude-preserving U-Net (MP-SiLU, MP-sum/concat, forced weight normalisation,
-  no GroupNorm in the main path).
-Pick the task (DDPM vs flow) here on evidence.
+**Stage 1 — strong recipe straight away** (both tasks, full 20k updates, concurrently)
+One "everything known-good" model per task, so the first results are already far below the baselines:
+- ADM/DDPM++-style U-Net at 0.9–1.0M params (parameter counter in the file): 32→16→8 (→4) levels,
+  2 residual blocks per level, GroupNorm + adaptive scale-shift from a sinusoidal time MLP, self-attention at
+  8×8 (and 16×16 if it fits), skip concatenation, zero-initialised final conv and residual output convs.
+- AdamW lr ~1e-3 → tune later, betas (0.9, 0.99), ~500-update warm-up, gradient clip 1.0, random horizontal flips,
+  bf16 autocast + TF32 (+ `torch.compile` if it compiles quickly), EMA tracked at 0.999 / 0.9995 / 0.9998 / 0.9999.
+- Decide DDPM vs flow from this pair; afterwards spend the GPU only on the winning task.
 
-**Stage 2 — training recipe** (best architecture, 20k updates)
-- EMA: track several decays in one run (e.g. 0.999, 0.9995, 0.9998, 0.9999, plus EDM2-style power EMA)
-  and evaluate each at the end (tuning only — the final file uses one fixed decay).
-- LR {3e-4, 6e-4, 1e-3, 2e-3} with warm-up; constant vs cosine vs inverse-sqrt decay; AdamW betas (0.9, 0.99);
-  gradient clip; weight decay; dropout {0, 0.1}; horizontal flips.
+**Stage 2 onwards — next biggest lever each time** (rough expected order of value; re-order on evidence)
+1. Learning rate / schedule (constant + EMA vs cosine vs inverse-sqrt decay) on the winner.
+2. Architecture capacity allocation: widths/levels/attention placement at the same budget; ConvNeXt-style
+   blocks; a simplified EDM2 magnitude-preserving U-Net (MP layers, forced weight normalisation).
+3. Output parameterisation inside `forward` (x-prediction converted to velocity/epsilon, Li & He 2025
+   "Back to Basics"; v-prediction for DDPM); dropout; weight decay.
+4. Anything else from recent papers (use web search) that fits the rules and promises a big gain.
 
-**Stage 3 — state-of-the-art extras** (one change at a time)
-- Output parameterisation (x-prediction converted inside `forward`, after Li & He 2025 "Back to Basics: Let
-  Denoising Generative Models Denoise"; v-prediction for DDPM), attention placement, width/depth reallocation,
-  EDM2 details (post-hoc EMA profile, learning-rate decay), anything else from recent papers you find with
-  web search that fits the rules.
-
-**Stage 4 — robustness**: top 2–3 candidates × 4 seeds + test split; pick the final.
+**Stage 4 — pick the final** from the evidence collected (no extra seeds unless the reviewer asks).
 
 **Stage 5 — final (only when the reviewer says so)**: `final/lab06_final.py` = the winner, cleaned up, with
 at the top: a brief abstract (≤ 8 comment lines, no KID claims needed), references (real papers with year
