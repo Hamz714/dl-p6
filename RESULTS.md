@@ -165,6 +165,20 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   updates about 5x AdamW's RMS on these small matrices; this matches 018's drifting weights and collapsed
   long EMAs.
 
+- Turn 007 (reviewer): sampler probe approved as analysis only (never used to choose anything inside the
+  final file); Muon retry 022 deferred. Launched exp_021_flow_hires and exp_023_flow_noflip together at 20:50.
+- exp_023_flow_noflip: the 011 net on the current recipe (warm-started EMA, primary EMA 0.9995) with the
+  horizontal-flip line removed. It differs from 021 only in widths and flips. The warm start affects only the
+  long EMAs, so its 0.999/0.9995 scores compare directly with 011's. Removing the flip also removes one CUDA
+  random draw per update, so its losses are not paired with 011's.
+- Prepared (a) exp_025_flow_hires_noflip = 021 + 023, for the case where both help.
+- Prepared (b) exp_024_flow_beta2: 011 net and current recipe with AdamW betas (0.9, 0.999) instead of
+  (0.9, 0.99). Reason: it is the setting DDPM/iDDPM/ADM trained CIFAR with; a longer second-moment average gives
+  steadier steps at constant LR (a tighter fit around the same minimum) without changing the LR scale.
+  Rejected: fp32 (bf16 rounding of ~2^-8 relative on |v| ~ 1.4 is an MSE floor of ~3e-5 against a loss of 0.18,
+  so it is negligible) and clip off (a no-op unless gradient norms exceed 1; tools/gradnorm_probe.py measures
+  this on saved weights).
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
