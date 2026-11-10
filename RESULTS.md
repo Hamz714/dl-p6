@@ -51,4 +51,9 @@ Launched 17:32.
   time) so that minutes per 1k updates can be read off the logs. Runner itself is unchanged.
 - `pypdf` installed into the venv to read the sheet (no `pdftotext` on the node).
 
+- Prepared (not run) for Stage 2: `exps/exp_012_flow_cosine.py` = Stage 1 recipe with peak LR 2e-3 and
+  half-cosine decay to 0 after the 500-update warm-up (`tools/train/ema_cosine.py`); primary EMA 0.9995
+  because LR annealing reduces the need for long averaging. Same network. Task is set to whichever wins Stage 1.
+- `tools/check_fixed.py` diffs the fixed sections of every experiment against the starter (all OK so far).
+
 ## Stage conclusions
