@@ -8,3 +8,17 @@
 20:33:13 14000 / 20000: loss 0.2007
 20:36:00 16000 / 20000: loss 0.1899
 20:38:46 18000 / 20000: loss 0.1952
+20:41:33 20000 / 20000: loss 0.1892
+20:42:34 KID x 1000: 37.616
+20:42:34 {
+20:42:34   "kid": 0.03761625289916992,
+20:42:34   "samples": 1000
+20:42:34 }
+20:42:34 Submission: /home3/xmzj54/p6/runs/exp_018_flow_muon_s3801_validation.zip
+20:42:34 RESULT {"exp": "exp_018_flow_muon", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 37.616, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 31.5, "finished": "2026-11-10 20:42:34"}
+20:43:08 KID x 1000: 34.204
+20:43:08 RESULT {"exp": "exp_018_flow_muon", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 34.204, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.0, "finished": "2026-11-10 20:43:08"}
+20:43:45 KID x 1000: 80.043
+20:43:46 RESULT {"exp": "exp_018_flow_muon", "seed": 3801, "split": "validation", "tag": "ema0.9998", "kid1000": 80.043, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.6, "finished": "2026-11-10 20:43:45"}
+20:44:23 KID x 1000: 223.207
+20:44:23 RESULT {"exp": "exp_018_flow_muon", "seed": 3801, "split": "validation", "tag": "ema0.9999", "kid1000": 223.207, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.3, "finished": "2026-11-10 20:44:23"}
