@@ -17,3 +17,6 @@ steady = (n - n // 10) / (stamps[-1] - stamps[1])  # from the first progress pri
 print(f"{path}: compile+first update {stamps[0]-t0:.0f}s; steady {steady:.2f} upd/s; {n} updates in {t1-t0:.1f}s (incl. compile) -> {n/(t1-t0):.2f} upd/s; "
       f"peak mem {torch.cuda.max_memory_allocated()/2**20:.0f} MiB; generate(50) {t3-t2:.1f}s; "
       f"extra EMAs {sorted(ns['EXTRA_EMA'])}; last loss {hist[-1]}", flush=True)
+late = [loss for step, loss in hist if step > 2 * n // 3]
+print(f"loss at {hist[-1][0]}: {hist[-1][1]:.4f}; mean of {len(late)} logged losses after update {2 * n // 3}: "
+      f"{sum(late) / len(late):.4f}; max {max(l for _, l in hist[1:]):.4f}", flush=True)
