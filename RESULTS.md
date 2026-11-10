@@ -25,6 +25,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_011_flow_strong | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 25.9 (EMA .9998) / 14.7 (.999) / **14.4** (.9995) / 355.3 (.9999) | 28.0 (+1.9 extra EMAs) | .9995: clean, varied horses, natural colours; .9999: noise-textured mush |
 | exp_012_flow_cosine | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 18.2 (EMA .999) / **18.0** (.9995) / 18.8 (.9998) / 27.5 (.9999) | 26.9 (+1.9 extra EMAs) | lr 2e-3 + cosine to 0, warm-started EMA; clean, similar to 011 |
 | exp_013_flow_wide | flow | 950,363 (+24 buf) | 20,000 | 3801 | val | 20.9 (EMA .999) / **20.8** (.9995) / 26.2 (.9998) / 53.9 (.9999) | 19.7 (+2.0 extra EMAs) | 012 recipe, (48,56,56), 1 down / 2 up, attn 8x8; clean, similar |
+| exp_014_flow_xpred | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 30.0 (EMA .999) / **29.7** (.9995) / 49.5 (.9998) / 131.3 (.9999) | 27.5 (+1.0 extra EMAs) | 011 net + recipe, x-prediction → velocity in `forward`; softer, blotchy textures |
+| exp_015_flow_mp | flow | 927,218 (+16 buf) | 20,000 | 3801 | val | 16.2 (EMA .999) / **14.8** (.9995) / 16.0 (.9998) / 21.5 (.9999) | 25.9 (+1.5 extra EMAs) | EDM2 MP U-Net, lr 1e-2 constant; clean, varied, similar to 011 |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -89,6 +91,21 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   with exp_015. Activations stay at
   std ≈ 0.8–1.2 through all blocks at init (CPU check). Layout/widths to be switched to the Stage 2 winner.
 
+- Turn 004: `~/.p6_agent` already existed and holds the absolute path of the CLI the driver launches (checked against the running process); left unchanged. 
+- Stage 3 (turn 004): exp_014 and exp_015 launched together exactly as prepared (two processes, ~13 upd/s each;
+  two other users' processes also on the slice). Paired single-batch losses (same seed → same batches/noise)
+  at 2k/4k/6k/8k: 011 .2045/.2069/.2039/.2152, 015 .1955/.2075/.1934/.2090 (≈2.5 % lower), 014
+  .2956/.2643/.2337/.2490 (higher; the 1/(1−t) conversion amplifies errors near t→1). 014 was not killed
+  because the reviewer asked for both results and its gap was shrinking.
+- Follow-up (a) = exp_017_flow_mp_isqrt: 015 (better mid-training loss) + EDM2's inverse-square-root LR decay,
+  lr = 1e-2·min(1, sqrt(T_REF/step)), T_REF = 1500 (≈7.5 % of training, the same proportion as EDM2's t_ref),
+  so lr ends at 2.7e-3. Reason: with forced weight normalisation the weight norms cannot grow, so the
+  effective step size never shrinks by itself; EDM2 pairs MP nets with this decay. 927,234 values; fixed parts OK.
+- Follow-up (b) = exp_016_flow_lrtail: 011 net, lr 1e-3 constant after warm-up, then linear decay to 0 over the
+  last 20 % (updates 16k–20k), warm-started EMA, primary EMA 0.9995. 981,667 values; fixed parts OK.
+  Neither follow-up has been GPU smoke-tested (a third process would have slowed the live runs); they change
+  only the LR lambda, which was checked numerically.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
@@ -101,3 +118,12 @@ gave 18.0 (+25 %, beyond the ~10 % tie band); the wide/shallow net on the same r
 EMA fixed the init-bias problem (012 EMA 0.9998: 18.8 vs 25.9 before) but 0.9999 is still worse, and
 0.999–0.9995 remain best. Incumbent: exp_011 (constant lr 1e-3, EMA 0.9995). Speed: the wide net trains
 ~30 % faster (17 vs 12.8 upd/s).
+
+**Stage 3 (turn 004).** The EDM2 magnitude-preserving U-Net (015) gave 14.8 vs the incumbent's 14.4, a tie
+(<10 %). It used 6 % fewer parameters and trained slightly faster, and its long EMAs held up much better
+(0.9998: 16.0 vs 25.9; 0.9999: 21.5 vs 355). It also had ~2.5 % lower paired training loss. x-prediction
+converted to velocity (014) was clearly worse (29.7, +106 %), with blotchy textures: at this tiny capacity and
+in pixel space (3,072 dims), the 1/(1−t) factor amplifies the network's errors near the data end, where the
+fixed loss and 25-step sampler need precise velocities. Li & He's gains come from high-dimensional patches,
+which don't apply here. Dropped. Incumbent stays exp_011 (simpler on a tie). The MP net is the base for
+schedule work, because its native EDM2 schedule (inverse-sqrt decay) has not been tried yet.
