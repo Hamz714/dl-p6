@@ -22,7 +22,7 @@ DATA_DIR = Path("data")
 CONFIG = dict(task="flow", steps=20000, batch_size=64,
               learning_rate=0.001, weight_decay=0.0)
 WARMUP = 500  # warm-up updates, then constant LR
-EMA_DECAYS = (0.9995, 0.999, 0.9993, 0.9997, 0.9998)  # first EMA decay is copied into the model
+EMA_DECAYS = (0.9995, 0.999, 0.9993, 0.9997)  # first EMA decay is copied into the model
 CHANNELS, BLOCKS, ATTENTION, EXPAND = (48, 56, 64), 2, (16, 8), 4  # widths at 32/16/8 px, blocks per level, attention resolutions, MLP expansion
 
 

@@ -239,6 +239,22 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
 - Prepared exp_029_flow_convnext_deep: the same ConvNeXt blocks, deeper and narrower: widths (40, 56, 56),
   3 blocks per level, expansion 3, 895,511 values (not smoke-tested; it only changes sizes in the 027 code).
 
+- Turn 009 (reviewer): 029 smoke-tested (200 updates, alone: 10.1 upd/s, 863 MiB, stable, extra EMAs load), then
+  exp_027_flow_convnext and exp_029_flow_convnext_deep launched together at 22:46 with EMA grid
+  0.999 / 0.9993 / 0.9995 / 0.9997 (0.9998 dropped, never best).
+- Prepared (a) exp_030_flow_precond: EDM-style preconditioning (Karras et al. 2022) for the velocity target,
+  inside Model.forward, on the 011 network (neither ConvNeXt result was in yet). Convention note: the fixed
+  flow_path is x_t = t*data + (1-t)*noise (t = 1 is data), the reverse of the formula in the instruction, so the
+  coefficients are derived for the code's convention. With d = t^2 s^2 + (1-t)^2: c_in = 1/sqrt(d),
+  c_skip = (t s^2 - (1-t))/d, c_out = s/sqrt(d), the variance-minimising choice that gives F a unit-variance target
+  (derivation: Var(v - c_skip x_t) = s^2/d at the optimum). d >= s^2/(1+s^2) > 0, so nothing divides by (1-t).
+  s = SIGMA_DATA = 0.5 (measured once: pixel std of the 4,000 training horses = 0.4985; hard-coded).
+  CPU checks on real training images: Var(c_in x_t) = 1.000-1.007 and Var(F target) = 1.000-1.007 at every t in
+  0..1 (the excess comes from the -0.06 image mean); at init the net outputs exactly c_skip*x_t, the best
+  linear predictor (MSE 0.25 / 0.80 / 1.08 at t = 0 / 0.5 / 0.96 vs 1.25 for a zero output). Time embedding unchanged.
+- Prepared (b) exp_031_flow_attn32: 011 + one head-32 self-attention layer in the last 32x32 encoder block
+  (down level 0, block 1), 985,955 values, no trimming needed (+4.3k).
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's

@@ -1,0 +1,14 @@
+W1110 22:44:41.615000 1372429 torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
+1 / 200: loss 1.2538
+20 / 200: loss 1.2243
+40 / 200: loss 1.1711
+60 / 200: loss 1.0715
+80 / 200: loss 0.9272
+100 / 200: loss 0.7576
+120 / 200: loss 0.5918
+140 / 200: loss 0.4464
+160 / 200: loss 0.3829
+180 / 200: loss 0.3727
+200 / 200: loss 0.3142
+exps/exp_029_flow_convnext_deep.py: compile+first update 114s; steady 10.07 upd/s; 200 updates in 133.9s (incl. compile) -> 1.49 upd/s; peak mem 863 MiB; generate(50) 2.0s; extra EMAs [0.999, 0.9993, 0.9997]; last loss [200, 0.314205]
+loss at 200: 0.3142; mean of 14 logged losses after update 133: 0.3873; max 1.2620
