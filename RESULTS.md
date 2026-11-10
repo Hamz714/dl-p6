@@ -27,6 +27,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_013_flow_wide | flow | 950,363 (+24 buf) | 20,000 | 3801 | val | 20.9 (EMA .999) / **20.8** (.9995) / 26.2 (.9998) / 53.9 (.9999) | 19.7 (+2.0 extra EMAs) | 012 recipe, (48,56,56), 1 down / 2 up, attn 8x8; clean, similar |
 | exp_014_flow_xpred | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 30.0 (EMA .999) / **29.7** (.9995) / 49.5 (.9998) / 131.3 (.9999) | 27.5 (+1.0 extra EMAs) | 011 net + recipe, x-prediction → velocity in `forward`; softer, blotchy textures |
 | exp_015_flow_mp | flow | 927,218 (+16 buf) | 20,000 | 3801 | val | 16.2 (EMA .999) / **14.8** (.9995) / 16.0 (.9998) / 21.5 (.9999) | 25.9 (+1.5 extra EMAs) | EDM2 MP U-Net, lr 1e-2 constant; clean, varied, similar to 011 |
+| exp_016_flow_lrtail | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 17.1 (EMA .999) / **15.7** (.9995) / 19.2 (.9998) / 50.1 (.9999) | 30.4 (+1.0 extra EMAs) | 011 + lr 1e-3 constant then linear to 0 over 16k-20k; clean, like 011 |
+| exp_017_flow_mp_isqrt | flow | 927,218 (+16 buf) | 20,000 | 3801 | val | 25.3 (EMA .999) / 24.3 (.9995) / **23.7** (.9998) / 30.9 (.9999) | 28.5 (+1.7 extra EMAs) | 015 + EDM2 1/sqrt(t) decay (T_REF 1500, lr ends 2.7e-3); grainy, dithered textures |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -125,6 +127,12 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   300-update 011 reference on identical batches, loss at 300 was 0.240 vs 0.264 and the mean of the logged
   losses over 200-300 was 0.256 vs 0.289 (-11 %). Stable: no spikes, the largest loss is update 1's.
   Speed was 5.3 vs 8.7 upd/s (unbatched version; -39 %); the batched step should close part of the gap.
+- Prepared for turn 006 (not run): exp_019_flow_lr2e3 = 011 net and recipe (warm-up, constant LR, warm-started
+  EMA) at constant lr 2e-3. It isolates the higher LR that 012 confounded with cosine decay. Recommended
+  pairing: exp_018_flow_muon + exp_019_flow_lr2e3 (both on the 011 net, so both compare cleanly with 14.4).
+- Muon references: K. Jordan et al. 2024, "Muon: An optimizer for hidden layers in neural networks" (blog,
+  kellerjordan.github.io/posts/muon); J. Liu et al. 2025, "Muon is Scalable for LLM Training", arXiv:2502.16982;
+  F. Schaipp 2025, "Optimization Benchmark for Diffusion Models on Dynamical Systems", arXiv:2510.19376.
 
 ## Stage conclusions
 
@@ -147,3 +155,11 @@ in pixel space (3,072 dims), the 1/(1−t) factor amplifies the network's errors
 fixed loss and 25-step sampler need precise velocities. Li & He's gains come from high-dimensional patches,
 which don't apply here. Dropped. Incumbent stays exp_011 (simpler on a tie). The MP net is the base for
 schedule work, because its native EDM2 schedule (inverse-sqrt decay) has not been tried yet.
+
+**Stage 4 (turn 005).** Neither schedule follow-up beat the incumbent. The short linear tail on 011 (016) gave
+15.7 vs 14.4, a tie (+9 %); its paired loss was 0.3-1.5 % lower after the decay, but KID did not improve.
+EDM2's inverse-sqrt decay on the MP net (017) was clearly worse than constant LR (24.3 vs 14.8, +64 %), with
+grainy textures, though its paired training loss matched 015's. Across 012, 016 and 017, every late LR
+reduction gave equal or worse KID at equal or lower loss: on this budget, EMA over a constant-LR trajectory
+beats annealing. Decay is dropped. The open question is the opposite direction (a higher constant LR, 019),
+plus the optimiser (Muon, 018). Incumbent unchanged: exp_011 (14.4).

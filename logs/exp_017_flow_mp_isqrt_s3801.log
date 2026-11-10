@@ -16,3 +16,9 @@
 20:02:50 }
 20:02:50 Submission: /home3/xmzj54/p6/runs/exp_017_flow_mp_isqrt_s3801_validation.zip
 20:02:50 RESULT {"exp": "exp_017_flow_mp_isqrt", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 24.348, "params": 927218, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 28.5, "finished": "2026-11-10 20:02:50"}
+20:03:28 KID x 1000: 25.306
+20:03:28 RESULT {"exp": "exp_017_flow_mp_isqrt", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 25.306, "params": 927218, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 29.1, "finished": "2026-11-10 20:03:28"}
+20:04:03 KID x 1000: 23.731
+20:04:03 RESULT {"exp": "exp_017_flow_mp_isqrt", "seed": 3801, "split": "validation", "tag": "ema0.9998", "kid1000": 23.731, "params": 927218, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 29.7, "finished": "2026-11-10 20:04:03"}
+20:04:29 KID x 1000: 30.905
+20:04:29 RESULT {"exp": "exp_017_flow_mp_isqrt", "seed": 3801, "split": "validation", "tag": "ema0.9999", "kid1000": 30.905, "params": 927218, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 30.2, "finished": "2026-11-10 20:04:29"}
