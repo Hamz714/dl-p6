@@ -134,6 +134,27 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   kellerjordan.github.io/posts/muon); J. Liu et al. 2025, "Muon is Scalable for LLM Training", arXiv:2502.16982;
   F. Schaipp 2025, "Optimization Benchmark for Diffusion Models on Dynamical Systems", arXiv:2510.19376.
 
+- Turn 006 (reviewer): late LR decay dropped. exp_019_flow_lr2e3 is superseded and was never run (012 already
+  contained 2e-3 and lost ~3.6 KID, against ~1.3 for decay alone); the file is kept for the record. Launched
+  exp_018_flow_muon (as smoke-tested) and exp_019_flow_dropout together at 20:11.
+- exp_019_flow_dropout: 011 net and recipe plus nn.Dropout(0.1) in every residual block, after the second
+  activation and before conv2 (Ho et al. 2020; EDM). Eval mode at sampling: image_score() calls model.eval()
+  right before generate(), and nothing in run() or the runner's extra-EMA scoring switches it back; the
+  extra-EMA models are fresh and also go through image_score(). CPU check: eval outputs are deterministic,
+  train outputs stochastic. Its training losses are not paired with 011's: the dropout masks draw from the
+  same CUDA random stream as the noise.
+- Muon speed in the full run: 2,000 updates in 2:47 vs 2:36 for 011 (batched Newton-Schulz), about 7 % slower.
+- Prepared (a) exp_020_flow_muon_dropout = 018 + 019 (the case where both help); 981,667 values.
+- Prepared (b) exp_021_flow_hires: 011 recipe, widths (40, 48, 40) instead of (32, 48, 48), 958,199 values.
+  Reason: the 32-px level (2 down + 3 up blocks) is the narrowest and carries the fine texture that KID is
+  sensitive to; standard CIFAR U-Nets (DDPM, ADM, DDPM++) never make the full-resolution level narrower than
+  the others. The 8x8 level already has global attention, so it can give up width. Depth and 16x16 attention
+  are kept (013 showed they matter). Cost: about 1.5x the compute at 32 px, so it trains slower.
+- runner.py now also saves the trained weights (primary + each extra EMA) to runs/<run>/weights/*.pt
+  (git-ignored), for offline diagnostics only. New tools/sampler_probe.py (analysis only) re-samples saved
+  weights with Euler at 25/50/100 steps using the same noise seed and KID code, to measure how much KID the
+  fixed 25-step sampler costs. The first runs with saved weights are next turn's (018/019 started earlier).
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
