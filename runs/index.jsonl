@@ -1,0 +1,1 @@
+{"exp": "exp_000_ddpm", "seed": 3801, "split": "validation", "tag": "", "kid1000": 164.258, "params": 120075, "buffers": 0, "config": {"task": "ddpm", "steps": 4000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 4.2, "finished": "2026-11-10 17:20:34"}
