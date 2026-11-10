@@ -7,3 +7,12 @@
 21:39:40 12000 / 20000: loss 0.1865
 21:42:14 14000 / 20000: loss 0.1743
 21:44:48 16000 / 20000: loss 0.1626
+21:47:21 18000 / 20000: loss 0.1607
+21:49:55 20000 / 20000: loss 0.2018
+21:50:49 KID x 1000: 15.330
+21:50:50 {
+21:50:50   "kid": 0.015329837799072266,
+21:50:50   "samples": 1000
+21:50:50 }
+21:50:50 Submission: /home3/xmzj54/p6/runs/exp_023_flow_noflip_s3801_validation.zip
+21:50:50 RESULT {"exp": "exp_023_flow_noflip", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 15.33, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 28.3, "finished": "2026-11-10 21:50:50"}
