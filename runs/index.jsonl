@@ -1,1 +1,2 @@
 {"exp": "exp_000_ddpm", "seed": 3801, "split": "validation", "tag": "", "kid1000": 164.258, "params": 120075, "buffers": 0, "config": {"task": "ddpm", "steps": 4000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 4.2, "finished": "2026-11-10 17:20:34"}
+{"exp": "exp_011_flow_strong", "seed": 3801, "split": "validation", "tag": "ema0.9998", "kid1000": 25.91, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 28.0, "finished": "2026-11-10 18:00:51"}
