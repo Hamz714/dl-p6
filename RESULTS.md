@@ -33,6 +33,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_019_flow_dropout | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **14.4** (EMA .999) / 14.5 (.9995) / 20.1 (.9998) / 45.5 (.9999) | 31.7 (+1.7 extra EMAs) | 011 + dropout 0.1 before conv2; clean, varied, slightly smoother than 011 |
 | exp_021_flow_hires | flow | 958,179 (+16 buf) | 20,000 | 3801 | val | **15.6** (EMA .999) / 16.0 (.9995) / 21.7 (.9998) / 35.7 (.9999) | 33.3 (+1.0 extra EMAs) | widths (40, 48, 40); crisper fine detail, a few more broken shapes. Rerun after the runner bug (first attempt stopped at 14k) |
 | exp_023_flow_noflip | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 15.8 (EMA .999) / **15.3** (.9995) / 17.2 (.9998) / 47.6 (.9999) | 28.3 (+2.0 extra EMAs) | 011 without flips; clean, like 011, slightly softer. Rerun after the runner bug (crashed attempt: .9995 = 15.27) |
+| exp_024_flow_beta2 | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 15.2 (.999) / 14.6 (.9993) / **14.2** (.9995) / 14.7 (.9997) / 16.8 (.9998) | 26.3 (+1.9 extra EMAs) | 011 + AdamW beta2 0.999; clean, like 011 |
+| exp_026_flow_lowres | flow | 944,755 (+16 buf) | 20,000 | 3801 | val | 19.7 (.999) / 19.4 (.9993) / **19.3** (.9995) / 19.8 (.9997) / 22.5 (.9998) | 25.3 (+2.2 extra EMAs) | (32, 40, 40, 40), blocks (1, 2, 2, 2), attn 16/8/4; softer, blurrier detail, shapes no better |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -229,6 +231,13 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   depthwise kernels give a much larger receptive field at every level (global shape), and a block costs about
   8C^2 + 49C against 18C^2 for the two 3x3 convs, so the same budget buys about 1.3x the width at the same
   depth. adaLN-Zero gating was rejected: the residual outputs are already zero-initialised, so it should add little.
+- 024 paired losses vs 011 (identical batches): +0-2 % to 6k, then the same within 0.5 % from 12k to 16k.
+- (a) exp_028_flow_lowres_beta2 will not be run: 026 lost and 024 only tied.
+- exp_027_flow_convnext GPU smoke test (300 updates, alone on the slice): compile 101 s, 11.6 upd/s, 854 MiB,
+  all extra EMAs load, stable; mean logged loss 200-300 = 0.286 (011's 300-update reference: 0.289, not
+  paired because the initialisation differs).
+- Prepared exp_029_flow_convnext_deep: the same ConvNeXt blocks, deeper and narrower: widths (40, 56, 56),
+  3 blocks per level, expansion 3, 895,511 values (not smoke-tested; it only changes sizes in the 027 code).
 
 ## Stage conclusions
 
@@ -275,3 +284,11 @@ detail but less coherent shapes. Sampler probe: 4x more Euler steps lowers KID b
 it is not the main floor; the variants keep landing at 14-16 for model/data reasons, within the
 1,000-sample KID noise. Clip at 1.0 never activates, so "clip off" would be a no-op. Incumbent unchanged:
 exp_011 (14.4). Eight changes in a row have tied or lost against it.
+
+**Stage 7 (turn 008).** Real-data floor: 1,000 real training horses score -0.02 against validation, so the
+metric allows far lower than our 14.4; the gap is model error. beta2 0.999 (024) tied (14.2 vs 14.4, -1 %).
+Its finer EMA grid gives a smooth optimum at 0.9995 (15.2 / 14.6 / 14.2 / 14.7 / 16.8 for .999 to .9998), so
+0.9995 is confirmed and the old 0.9998 'cliff' (25.9 in 011) was mostly init bias plus a slope after .9997.
+Shifting capacity to a 4x4 level (026) was clearly worse (19.3, +34 %) with blurrier samples: like 021
+(capacity to 32 px, 15.6), moving width away from 011's balanced 16/8-px levels hurts. Incumbent unchanged:
+exp_011 (14.4); 024 is an equal alternative.
