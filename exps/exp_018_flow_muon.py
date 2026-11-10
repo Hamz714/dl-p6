@@ -289,12 +289,13 @@ def sample_flow(model, labels, steps=25, device='cpu', generator=None, shape=(3,
 # %% Training
 
 def orthogonalise(g, steps=5, eps=1e-7):
-    """Quintic Newton-Schulz iteration (Jordan et al. 2024): maps a matrix to roughly the nearest semi-orthogonal one."""
+    """Quintic Newton-Schulz iteration (Jordan et al. 2024): maps each matrix in a stack (..., rows, cols) to
+    roughly the nearest semi-orthogonal one."""
     a, b, c = 3.4445, -4.7750, 2.0315
     x = g.bfloat16()
-    tall = x.size(0) > x.size(1)
+    tall = x.size(-2) > x.size(-1)
     x = x.mT if tall else x
-    x = x / (x.norm() + eps)
+    x = x / (x.norm(dim=(-2, -1), keepdim=True) + eps)
     for _ in range(steps):
         s = x @ x.mT
         x = a * x + (b * s + c * s @ s) @ x
@@ -321,12 +322,16 @@ class MuonAdamW(torch.optim.Optimizer):
                 torch._foreach_mul_(params, 1 - lr * wd)  # decoupled weight decay
             states = [self.state[p] for p in params]
             if group["muon"]:
-                for p, g, state in zip(params, grads, states):
-                    buf = state.setdefault("momentum", torch.zeros_like(p))
-                    buf.lerp_(g, 1 - group["momentum"])
-                    update = g.lerp(buf, group["momentum"]).flatten(1)  # Nesterov momentum
-                    scale = max(1, update.size(0) / update.size(1)) ** 0.5
-                    p.add_(orthogonalise(update).view_as(p), alpha=-lr * scale)
+                bufs = [st.setdefault("momentum", torch.zeros_like(p)) for p, st in zip(params, states)]
+                torch._foreach_lerp_(bufs, grads, 1 - group["momentum"])
+                updates = torch._foreach_lerp(grads, bufs, group["momentum"])  # Nesterov momentum
+                shapes = {}  # orthogonalise all matrices of one shape together (conv kernels as out x in*k*k)
+                for p, u in zip(params, updates):
+                    shapes.setdefault(u.flatten(1).shape, []).append((p, u.flatten(1)))
+                for (rows, cols), items in shapes.items():
+                    ortho = orthogonalise(torch.stack([u for _, u in items]))
+                    torch._foreach_add_([p for p, _ in items], [o.view_as(p) for (p, _), o in zip(items, ortho)],
+                                        alpha=-lr * max(1, rows / cols) ** 0.5)
             else:
                 for p, state in zip(params, states):
                     if not state:
