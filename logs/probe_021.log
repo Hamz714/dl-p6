@@ -1,2 +1,4 @@
 Euler  25 steps: KID x1000 16.03
 Euler  50 steps: KID x1000 14.27
+Euler 100 steps: KID x1000 13.04
+grad norm over 50 batches: median 0.045, 90th pct 0.063, max 0.086; fraction > 1.0: 0.00

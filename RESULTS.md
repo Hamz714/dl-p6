@@ -31,6 +31,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_017_flow_mp_isqrt | flow | 927,218 (+16 buf) | 20,000 | 3801 | val | 25.3 (EMA .999) / 24.3 (.9995) / **23.7** (.9998) / 30.9 (.9999) | 28.5 (+1.7 extra EMAs) | 015 + EDM2 1/sqrt(t) decay (T_REF 1500, lr ends 2.7e-3); grainy, dithered textures |
 | exp_018_flow_muon | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **34.2** (EMA .999) / 37.6 (.9995) / 80.0 (.9998) / 223.2 (.9999) | 31.5 (+1.8 extra EMAs) | 011 + MuonAdamW (Muon lr 0.02); muddy, desaturated, noisy textures, broken shapes |
 | exp_019_flow_dropout | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **14.4** (EMA .999) / 14.5 (.9995) / 20.1 (.9998) / 45.5 (.9999) | 31.7 (+1.7 extra EMAs) | 011 + dropout 0.1 before conv2; clean, varied, slightly smoother than 011 |
+| exp_021_flow_hires | flow | 958,179 (+16 buf) | 20,000 | 3801 | val | **15.6** (EMA .999) / 16.0 (.9995) / 21.7 (.9998) / 35.7 (.9999) | 33.3 (+1.0 extra EMAs) | widths (40, 48, 40); crisper fine detail, a few more broken shapes. Rerun after the runner bug (first attempt stopped at 14k) |
+| exp_023_flow_noflip | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 15.8 (EMA .999) / **15.3** (.9995) / 17.2 (.9998) / 47.6 (.9999) | 28.3 (+2.0 extra EMAs) | 011 without flips; clean, like 011, slightly softer. Rerun after the runner bug (crashed attempt: .9995 = 15.27) |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -187,6 +189,21 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   runs were relaunched at 21:22 with the fixed runner; the partial outputs are kept as *_crashed / *_killed.
   tools/sampler_probe.py had the same copy problem (fixed; checked that 25/50/100 steps give 25/50/100 model
   calls). Cost: ~30 GPU-minutes.
+- tools/sampler_probe.py had a second bug: image_score is wrapped by torch.no_grad, so its __globals__ are
+  torch's, and the first probe (all three step counts 15.32) silently sampled with 25 steps every time.
+  Fixed: it patches run.__globals__ instead, checked through image_score itself with a counting dummy model
+  (500 / 2000 calls for 25 / 100 steps). The runner fix was unaffected (run() is not decorated); the probe's
+  25-step score matches the runner's (15.32 vs 15.33), confirming the saved weights are the trained model.
+
+## Sampler probe (analysis only; EMA 0.9995 weights; same noise seed and KID code as image_score)
+
+| exp | Euler 25 (fixed) | Euler 50 | Euler 100 | 25 -> 100 |
+|---|---|---|---|---|
+| exp_021_flow_hires | 16.03 | 14.27 | 13.04 | -19 % |
+| exp_023_flow_noflip | 15.32 | 14.72 | 14.44 | -6 % |
+
+Gradient norms at the end of training (50 batches, tools/gradnorm_probe.py): 021 median 0.045 (max 0.086),
+023 median 0.059 (max 0.123); never above the clip threshold of 1.0, so clipping is inactive after warm-up.
 
 ## Stage conclusions
 
@@ -225,3 +242,11 @@ on a tie the simpler option wins, so no dropout. Incumbent unchanged: exp_011 (1
 016 (LR tail) and 019 (dropout) all landed at 14.4-15.7 whatever their training loss; this looks like a
 floor. Prime suspect: the fixed 25-step Euler sampler, plus about +-2 KID of 1,000-sample noise. The
 sampler probe will measure it on the next run's saved weights.
+
+**Stage 6 (turn 007).** Neither tighter-fit change helped. No flips (023): 15.3 vs 14.4 (+6 %, tie, leaning
+worse); flips are kept. Widths (40, 48, 40) (021): 15.6 at EMA .999 (+8 %, tie, leaning worse), with crisper
+detail but less coherent shapes. Sampler probe: 4x more Euler steps lowers KID by only 6 % (023) to 19 %
+(021), i.e. 1-3 KID. So the fixed 25-step sampler costs something, more for the sharper wide-32px model, but
+it is not the main floor; the variants keep landing at 14-16 for model/data reasons, within the
+1,000-sample KID noise. Clip at 1.0 never activates, so "clip off" would be a no-op. Incumbent unchanged:
+exp_011 (14.4). Eight changes in a row have tied or lost against it.
