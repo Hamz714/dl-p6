@@ -20,7 +20,7 @@ DATA_DIR = Path("data")
 # %% Model and training settings
 
 CONFIG = dict(task="flow", steps=20000, batch_size=64,
-              learning_rate=0.002, weight_decay=0.0)
+              learning_rate=0.001, weight_decay=0.0)
 WARMUP, EMA_DECAYS = 500, (0.9995, 0.999, 0.9998, 0.9999)  # first EMA decay is copied into the model
 CHANNELS, BLOCKS, ATTENTION = (32, 48, 48), 2, (16, 8)  # widths at 32/16/8 px, blocks per level, attention resolutions
 
@@ -292,14 +292,11 @@ EXTRA_EMA = {}  # decay -> state_dict of the other tracked EMAs, evaluated separ
 
 
 def train(model, device):
-    """AdamW with linear warm-up then cosine decay to zero, bf16 autocast, torch.compile, horizontal flips and warm-started EMA of the weights."""
+    """AdamW with linear warm-up then constant LR, bf16 autocast, torch.compile, horizontal flips and warm-started EMA of the weights."""
     images, labels = image_data()
     optimiser = torch.optim.AdamW(model.parameters(), lr=CONFIG["learning_rate"], betas=(0.9, 0.99),
                                   weight_decay=CONFIG["weight_decay"])
-    def lr_factor(step):  # linear warm-up, then half-cosine decay to zero at the last update
-        progress = max(0.0, step - WARMUP) / max(1, CONFIG["steps"] - WARMUP)
-        return min(1.0, (step + 1) / WARMUP) * 0.5 * (1 + math.cos(math.pi * progress))
-    scheduler = torch.optim.lr_scheduler.LambdaLR(optimiser, lr_factor)
+    scheduler = torch.optim.lr_scheduler.LambdaLR(optimiser, lambda step: min(1.0, (step + 1) / WARMUP))
     schedule = diffusion_schedule(device=device)
     params = list(model.parameters())
     emas = [[p.detach().clone() for p in params] for _ in EMA_DECAYS]

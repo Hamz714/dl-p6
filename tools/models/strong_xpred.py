@@ -1,7 +1,7 @@
 # %% Model and training settings
 
 CONFIG = dict(task="flow", steps=20000, batch_size=64,
-              learning_rate=0.002, weight_decay=0.0)
+              learning_rate=0.001, weight_decay=0.0)
 WARMUP, EMA_DECAYS = 500, (0.9995, 0.999, 0.9998, 0.9999)  # first EMA decay is copied into the model
 CHANNELS, BLOCKS, ATTENTION = (32, 48, 48), 2, (16, 8)  # widths at 32/16/8 px, blocks per level, attention resolutions
 

@@ -23,6 +23,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_001–004 | — | — | — | — | — | — | — | killed at the start of turn 002 (plan changed; not needed) |
 | exp_010_ddpm_strong | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | **100.9** (EMA .9998) / 105.0 (.999) / 104.5 (.9995) / 188.6 (.9999) | 29.0 (+3.1 extra EMAs) | strong colour casts (saturated blue/magenta/green tints) |
 | exp_011_flow_strong | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 25.9 (EMA .9998) / 14.7 (.999) / **14.4** (.9995) / 355.3 (.9999) | 28.0 (+1.9 extra EMAs) | .9995: clean, varied horses, natural colours; .9999: noise-textured mush |
+| exp_012_flow_cosine | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 18.2 (EMA .999) / **18.0** (.9995) / 18.8 (.9998) / 27.5 (.9999) | 26.9 (+1.9 extra EMAs) | lr 2e-3 + cosine to 0, warm-started EMA; clean, similar to 011 |
+| exp_013_flow_wide | flow | 950,363 (+24 buf) | 20,000 | 3801 | val | 20.9 (EMA .999) / **20.8** (.9995) / 26.2 (.9998) / 53.9 (.9999) | 19.7 (+2.0 extra EMAs) | 012 recipe, (48,56,56), 1 down / 2 up, attn 8x8; clean, similar |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -80,7 +82,11 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
 - Prepared follow-up: exp_015_flow_mp = EDM2-style magnitude-preserving U-Net (unit-norm MPConv weights with
   forced weight normalisation after each update, mp_silu / mp_sum / mp_cat, pixel norm in encoder blocks,
   multiplicative time conditioning, no GroupNorm, no biases, zero output gain) in the 012 layout, 927,234
-  values, peak LR 1e-2 (EDM2 scale for unit-norm weights) with the 012 schedule. Activations stay at
+  values, peak LR 1e-2 (EDM2 scale for unit-norm weights). After Stage 2 its schedule was switched to the
+  011 one (warm-up then constant; warm-started EMA kept) because cosine did not help. GPU smoke test (300 upd,
+  next to exp_012): 12.9 upd/s, 445 MiB, compile 3.6 min under contention, loss falling normally.
+- exp_014_flow_xpred rebuilt on the incumbent 011 recipe (lr 1e-3 constant, warm-started EMA) — ready to pair
+  with exp_015. Activations stay at
   std ≈ 0.8–1.2 through all blocks at init (CPU check). Layout/widths to be switched to the Stage 2 winner.
 
 ## Stage conclusions
@@ -88,3 +94,10 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
 30.6 — vs DDPM 100.9 (EMA 0.9998). Shorter EMA (0.999–0.9995) wins under a constant LR; long EMAs were
 broken by init bias (fixed for Stage 2). Flow is the task from here on.
+
+**Stage 2 (turn 003).** Neither change beat the incumbent exp_011 (14.4). Peak LR 2e-3 + cosine decay (012)
+gave 18.0 (+25 %, beyond the ~10 % tie band); the wide/shallow net on the same recipe (013) gave 20.8 vs 012's
+18.0 (+15 %): the deeper 32/48/48 layout with 16x16 attention is the better use of the budget. The warm-started
+EMA fixed the init-bias problem (012 EMA 0.9998: 18.8 vs 25.9 before) but 0.9999 is still worse, and
+0.999–0.9995 remain best. Incumbent: exp_011 (constant lr 1e-3, EMA 0.9995). Speed: the wide net trains
+~30 % faster (17 vs 12.8 upd/s).
