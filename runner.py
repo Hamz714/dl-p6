@@ -20,9 +20,17 @@ out = Path("runs") / name
 # run_name is not "__main__", so the program's own run() call does not fire;
 # runpy still sets __file__, which program_source() needs.
 ns = runpy.run_path(str(exp), run_name="p6_experiment")
+built, build = [], ns["build_model"]  # keep a handle on the model run() builds, to save its weights
+ns["build_model"] = lambda: built.append(build()) or built[-1]
 start = time.time()
 result = ns["run"](out=str(out), seed=args.seed, split=args.split, show=False)
 minutes = (time.time() - start) / 60
+ns["build_model"] = build
+# Weights for offline diagnostics only (git-ignored *.pt); never used for picking anything.
+(out / "weights").mkdir(parents=True, exist_ok=True)
+ns["torch"].save(built[0].state_dict(), out / "weights" / f"ema{ns.get('EMA_DECAYS', ('main',))[0]}.pt")
+for decay, state in ns.get("EXTRA_EMA", {}).items():
+    ns["torch"].save(state, out / "weights" / f"ema{decay}.pt")
 
 ema = ns.get("EMA_DECAYS", (None,))[0]
 row = dict(exp=exp.stem, seed=args.seed, split=args.split, tag=args.tag or (f"ema{ema}" if ema else ""),
