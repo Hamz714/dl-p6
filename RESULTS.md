@@ -205,6 +205,31 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
 Gradient norms at the end of training (50 batches, tools/gradnorm_probe.py): 021 median 0.045 (max 0.086),
 023 median 0.059 (max 0.123); never above the clip threshold of 1.0, so clipping is inactive after warm-up.
 
+## Real-data floor (turn 008; analysis only, nothing in any experiment or the final file depends on it)
+
+tools/real_floor.py scores the first 1,000 images of image_data("train") (its fixed seed-3802 order, no flips)
+against the validation split through image_score() itself (generate() swapped to hand out those images, 50
+per call), so pixels, Inception features and KID settings are identical to every run: **KID x1000 = -0.02**.
+A perfect memoriser of the training set would score about 0, so the metric itself does not rule out single
+digits. Our 14.4 is model error, not a property of the train/validation split.
+
+- Turn 008 (reviewer): Muon dropped (022 not to be run); exp_025 (a) not run. Launched exp_024_flow_beta2 and
+  exp_026_flow_lowres together at 22:10, both with the finer EMA grid 0.999 / 0.9993 / 0.9995 / 0.9997 / 0.9998
+  (primary 0.9995).
+- exp_026_flow_lowres: 011 recipe; the Model now accepts blocks per level. Widths (32, 40, 40, 40) at 32/16/8/4 px,
+  blocks (1, 2, 2, 2), attention at 16/8/4 (the middle blocks now sit at 4x4), 944,771 values. Reason: 013 showed
+  depth beats width in this budget, and a 4x4 level roughly doubles the processing depth at global scale
+  (shape), at the cost of one 32x32 down block and 48 -> 40 at 16/8. Widening 8x8 instead is costly: (32, 48, 64)
+  is 1.26M even with a single 32x32 block, because every up block concatenates skips. Smoke test (200 updates,
+  next to 024's): 18.1 upd/s, 358 MiB, all extra EMAs load.
+- Prepared (a) exp_028_flow_lowres_beta2 = 026 + beta2 0.999 (944,771 values), for the case where both help.
+- Prepared (b) exp_027_flow_convnext: ConvNeXt-style blocks (Liu et al. 2022) in the 011 skeleton: 7x7 depthwise
+  conv -> GroupNorm with FiLM scale/shift -> 1x1 (4x) -> SiLU -> zero-initialised 1x1, residual; 1x1 skip when the
+  width changes; same attention. Widths (48, 56, 64), 2 blocks per level, 935,715 values. Reason: the 7x7
+  depthwise kernels give a much larger receptive field at every level (global shape), and a block costs about
+  8C^2 + 49C against 18C^2 for the two 3x3 convs, so the same budget buys about 1.3x the width at the same
+  depth. adaLN-Zero gating was rejected: the residual outputs are already zero-initialised, so it should add little.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
