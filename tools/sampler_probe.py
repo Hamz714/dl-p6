@@ -8,7 +8,8 @@ model = ns["build_model"]().cuda()
 model.load_state_dict(torch.load(sys.argv[2], map_location="cuda"))
 model.eval()
 for steps in [int(a) for a in sys.argv[3:]] or [25, 50, 100]:
-    ns["generate"] = lambda m, n, device, generator: ns["sample_flow"](
+    # run_path returns a copy of the globals: patch the dict image_score() actually reads.
+    ns["image_score"].__globals__["generate"] = lambda m, n, device, generator: ns["sample_flow"](
         m, torch.zeros(n, dtype=torch.long, device=device), steps, device, generator)
     folder = __import__("pathlib").Path(f"/tmp/probe_{steps}"); folder.mkdir(exist_ok=True)
     kid = ns["image_score"](model, folder, "cuda", "validation")["kid"]

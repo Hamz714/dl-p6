@@ -178,6 +178,15 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   Rejected: fp32 (bf16 rounding of ~2^-8 relative on |v| ~ 1.4 is an MSE floor of ~3e-5 against a loss of 0.18,
   so it is negligible) and clip off (a no-op unless gradient norms exceed 1; tools/gradnorm_probe.py measures
   this on saved weights).
+- Tooling bug (mine, turn 006 change): the runner's weight capture patched the dict returned by
+  runpy.run_path, which is a COPY of the program's globals, so run() never used the wrapper. The first 023 run
+  crashed right after its primary score (EMA 0.9995: 15.27, from the log; no index row), losing the
+  extra-EMA scores and the weights. 021 (at 14k updates) had loaded the same runner, so it was stopped. Fixed:
+  the wrapper goes into run.__globals__, and weight saving now happens after the index row and is never
+  fatal. Verified end to end with a fake program in a scratch directory (no index row written). Both
+  runs were relaunched at 21:22 with the fixed runner; the partial outputs are kept as *_crashed / *_killed.
+  tools/sampler_probe.py had the same copy problem (fixed; checked that 25/50/100 steps give 25/50/100 model
+  calls). Cost: ~30 GPU-minutes.
 
 ## Stage conclusions
 
