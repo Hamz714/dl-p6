@@ -106,6 +106,26 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   Neither follow-up has been GPU smoke-tested (a third process would have slowed the live runs); they change
   only the LR lambda, which was checked numerically.
 
+- Turn 005 rulings (reviewer): autoguidance not allowed (changes the effective sampler); augmentation beyond
+  flips not allowed (risks counting as extra data); Muon allowed as ONE optimiser class with one step() per update.
+- Stage 4 (turn 005): exp_017 and exp_016 launched together exactly as prepared (19:32). The node was heavily
+  loaded (load ~24), so compilation took ~5 min.
+- exp_018_flow_muon (prepared, smoke-tested, not run): 011 net and recipe (warm-up then constant LR,
+  warm-started EMA), with the optimiser replaced by `MuonAdamW`, a single `torch.optim.Optimizer` subclass.
+  Groups marked muon=True (83 hidden weight matrices: block convs, 1x1 skips, attention qkv/proj, FiLM linears;
+  963,328 values) get Nesterov momentum 0.95, then 5 quintic Newton-Schulz steps in bf16 (conv kernels
+  flattened to out x in*k*k), lr 0.02·sqrt(max(1, rows/cols)). The other groups (biases, GroupNorm gains,
+  time-embedding MLP, input and output convs) get AdamW at lr 1e-3, betas (0.9, 0.99), all in the same step().
+  torch 2.14 ships `torch.optim.Muon`, but it is 2-D-only and a separate optimiser, so the one-class version
+  is self-contained instead. CPU checks: the AdamW branch matches `torch.optim.AdamW` to 6e-8; Newton-Schulz
+  singular values are 0.67-1.13 (the intended band for these coefficients). The Newton-Schulz step is batched
+  over matrices of the same shape: 33 vs 87 ms per optimiser step (torch AdamW: 5 ms), timed with the two
+  live runs on the slice.
+- Muon smoke test (300 updates, seed 3801, run next to exp_016/017, so speeds are contended): paired with a
+  300-update 011 reference on identical batches, loss at 300 was 0.240 vs 0.264 and the mean of the logged
+  losses over 200-300 was 0.256 vs 0.289 (-11 %). Stable: no spikes, the largest loss is update 1's.
+  Speed was 5.3 vs 8.7 upd/s (unbatched version; -39 %); the batched step should close part of the gap.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
