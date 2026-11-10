@@ -65,6 +65,24 @@ Launched 17:32. **Actual**: 12.8 upd/s each (26.4 min for 20k), training done 18
   Fix stacked into exp_012: EMA weight max(1−decay, 1/(step+1)) = running mean until the 1/(1−decay) horizon.
 - exp_012_flow_cosine smoke-tested for 100 updates (13.7 upd/s alone, no errors); not launched (next turn).
 
+- Turn 003: standing rule — no AI tool/model/vendor names in tracked files; the agent's own files
+  (RESULTS.md, tools/, exps/, logrun.sh, runner.py) were checked and contain none. README.md and p6_brief.md
+  (not written by the agent) still contain such names and were left untouched.
+- Stage 2 (turn 003): DDPM dropped; flow only. exp_012 launched exactly as prepared.
+- exp_013_flow_wide: 012 recipe, widths (48, 56, 56), 1 block down / 2 up per level, attention at 8x8 + middle,
+  950,387 values. (48, 64, 64) is 1.15M with this layout (the concatenating up blocks dominate), so the
+  64s were trimmed to 56 to land in 0.95–1.0M.
+- No third concurrent run: in a three-process smoke test exp_012 ran at 6.0 upd/s vs ~11 with two processes
+  (the slice's total throughput is ~fixed, so a 3rd run costs the other two >20 %). Two of the three smoke
+  processes also died silently during the concurrent compile (no traceback; not reproduced with two).
+  Prepared but not run: exp_014_flow_xpred (012 + x-prediction converted to velocity in `forward`,
+  1−t floored at 0.05; 11.6 upd/s in smoke test).
+- Prepared follow-up: exp_015_flow_mp = EDM2-style magnitude-preserving U-Net (unit-norm MPConv weights with
+  forced weight normalisation after each update, mp_silu / mp_sum / mp_cat, pixel norm in encoder blocks,
+  multiplicative time conditioning, no GroupNorm, no biases, zero output gain) in the 012 layout, 927,234
+  values, peak LR 1e-2 (EDM2 scale for unit-norm weights) with the 012 schedule. Activations stay at
+  std ≈ 0.8–1.2 through all blocks at init (CPU check). Layout/widths to be switched to the Stage 2 winner.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
