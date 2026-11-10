@@ -9,3 +9,18 @@
 22:30:09 16000 / 20000: loss 0.1913
 22:32:30 18000 / 20000: loss 0.1873
 22:34:53 20000 / 20000: loss 0.1908
+22:35:41 KID x 1000: 19.267
+22:35:42 {
+22:35:42   "kid": 0.01926732063293457,
+22:35:42   "samples": 1000
+22:35:42 }
+22:35:42 Submission: /home3/xmzj54/p6/runs/exp_026_flow_lowres_s3801_validation.zip
+22:35:42 RESULT {"exp": "exp_026_flow_lowres", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 19.267, "params": 944755, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 25.3, "finished": "2026-11-10 22:35:42"}
+22:36:16 KID x 1000: 19.657
+22:36:16 RESULT {"exp": "exp_026_flow_lowres", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 19.657, "params": 944755, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 25.9, "finished": "2026-11-10 22:36:16"}
+22:36:43 KID x 1000: 19.378
+22:36:43 RESULT {"exp": "exp_026_flow_lowres", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 19.378, "params": 944755, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 26.3, "finished": "2026-11-10 22:36:43"}
+22:37:17 KID x 1000: 19.761
+22:37:17 RESULT {"exp": "exp_026_flow_lowres", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 19.761, "params": 944755, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 26.9, "finished": "2026-11-10 22:37:17"}
+22:37:51 KID x 1000: 22.546
+22:37:51 RESULT {"exp": "exp_026_flow_lowres", "seed": 3801, "split": "validation", "tag": "ema0.9998", "kid1000": 22.546, "params": 944755, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 27.5, "finished": "2026-11-10 22:37:51"}

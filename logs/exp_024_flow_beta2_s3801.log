@@ -8,3 +8,19 @@
 22:28:31 14000 / 20000: loss 0.1877
 22:31:00 16000 / 20000: loss 0.1845
 22:33:28 18000 / 20000: loss 0.1875
+22:35:54 20000 / 20000: loss 0.1799
+22:36:43 KID x 1000: 14.228
+22:36:43 {
+22:36:43   "kid": 0.014228343963623047,
+22:36:43   "samples": 1000
+22:36:43 }
+22:36:43 Submission: /home3/xmzj54/p6/runs/exp_024_flow_beta2_s3801_validation.zip
+22:36:43 RESULT {"exp": "exp_024_flow_beta2", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 14.228, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 26.3, "finished": "2026-11-10 22:36:43"}
+22:37:21 KID x 1000: 15.199
+22:37:21 RESULT {"exp": "exp_024_flow_beta2", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 15.199, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 27.0, "finished": "2026-11-10 22:37:21"}
+22:37:55 KID x 1000: 14.599
+22:37:55 RESULT {"exp": "exp_024_flow_beta2", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 14.599, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 27.5, "finished": "2026-11-10 22:37:55"}
+22:38:14 KID x 1000: 14.745
+22:38:14 RESULT {"exp": "exp_024_flow_beta2", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 14.745, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 27.9, "finished": "2026-11-10 22:38:14"}
+22:38:33 KID x 1000: 16.774
+22:38:33 RESULT {"exp": "exp_024_flow_beta2", "seed": 3801, "split": "validation", "tag": "ema0.9998", "kid1000": 16.774, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 28.2, "finished": "2026-11-10 22:38:33"}
