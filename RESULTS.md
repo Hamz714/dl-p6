@@ -367,6 +367,19 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   share t, so each step uses one expert. CPU-checked routing. Rated below (a): capacity is the binding constraint,
   and each expert gets under half of it.
 
+- Turn 015 (reviewer): new switch rule (a 20 % band): a candidate replaces 037 in the final only if its best EMA scores
+  <= 7.0; 7.0-10.4 is a tie (no switch, no extra runs). No second seeds (standing order).
+- 040 and 041 smoke-tested together (200 updates): 040 13.5 upd/s, 538 MiB; 041 11.7 upd/s, 588 MiB (0.77x / 0.67x
+  of 037's 17.6 in its own shared smoke test; both above 0.5x, so no swap). Launched together at 14:53.
+  The turn was cut off by a usage limit ~5 min later; both runs kept going (nohup).
+- Turn 015 resumed: both alive. 041's log stopped after update 1 (its progress lines no longer reached the log; the
+  process was healthy). A stack dump of the process showed it inside the compiled backward pass, at update
+  6,320 -> 6,557 in 30 s (~8 upd/s), i.e. training normally. Results go straight to runs/index.jsonl, so they are
+  read from there.
+- Prepared exp_042_ddpm_v_noflip (037 without flips; 981,667 values; check_fixed OK) for after the restart.
+  Reason: the real-data floor (~0) says matching the exact training distribution costs nothing on this metric, and
+  DDPM's 100-step stochastic sampler may reward an exact-distribution fit more than flow did (flow no-flip was a tie).
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
