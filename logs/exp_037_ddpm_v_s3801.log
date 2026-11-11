@@ -9,3 +9,13 @@
 13:49:37 14000 / 20000: loss 0.0572
 13:52:14 16000 / 20000: loss 0.0893
 13:54:51 18000 / 20000: loss 0.0498
+13:57:27 20000 / 20000: loss 0.0703
+13:59:24 KID x 1000: 8.667
+13:59:24 {
+13:59:24   "kid": 0.008666753768920898,
+13:59:24   "samples": 1000
+13:59:24 }
+13:59:24 Submission: /home3/xmzj54/p6/runs/exp_037_ddpm_v_s3801_validation.zip
+13:59:24 RESULT {"exp": "exp_037_ddpm_v", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 8.667, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 29.6, "finished": "2026-11-11 13:59:24"}
+14:01:12 KID x 1000: 9.067
+14:01:12 RESULT {"exp": "exp_037_ddpm_v", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 9.067, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 31.4, "finished": "2026-11-11 14:01:12"}
