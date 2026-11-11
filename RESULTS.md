@@ -557,3 +557,4 @@ once; this decision departs from it on both counts, with disclosure.
 - Acknowledged copies in final/cand/S_1..S_4 (git-ignored; diff vs the tracked file = only the acknowledgement hunk;
   last line run(seed=3802); check_fixed OK). tools/s_rounds.sh (nohup) runs `python lab06_final.py` in each directory,
   two at a time (S_1 + S_2, then S_3 + S_4); log final/cand/s_rounds.log. Started 20:02.
+- Pair 1 (20:02-20:29): S_1 7.81, S_2 7.53.
