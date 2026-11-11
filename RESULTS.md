@@ -39,6 +39,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_029_flow_convnext_deep | flow | 895,491 (+20 buf) | 20,000 | 3801 | val | **16.3** (.999) / 16.7 (.9993) / 17.4 (.9995) / 22.2 (.9997) | 69.2 (+1.3 extra EMAs) | ConvNeXt blocks, (40, 56, 56), 3/level, expand 3; clean, smooth, a little blurrier. ~4.6 upd/s shared |
 | exp_030_flow_precond | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 19.9 (.999) / **19.5** (.9993) / 19.6 (.9995) / 21.2 (.9997); snapshots .9995: 28.5 @10k, 21.2 @15k | 27.0 (+3.3 extra EMAs/snapshots) | 011 + EDM-style preconditioning; softer, partly washed out / desaturated |
 | exp_031_flow_attn32 | flow | 985,939 (+16 buf) | 20,000 | 3801 | val | 16.9 (.999) / 16.5 (.9993) / **16.1** (.9995) / 16.9 (.9997); snapshots .9995: 24.3 @10k, 17.6 @15k | 33.5 (+1.9 extra EMAs/snapshots) | 011 + attention in the last 32x32 encoder block; clean, sharp, like 011 |
+| exp_033_flow_lean | flow | 984,711 (+20 buf) | 20,000 | 3801 | val | 16.4 (.999) / **16.3** (.9993) / 16.4 (.9995) / 18.3 (.9997) | 29.3 (+1.9 extra EMAs) | 2 up blocks/level, one skip each, widths (40, 52, 52); clean, slightly soft |
+| exp_034_flow_lean_deep | flow | 983,743 (+16 buf) | 20,000 | 3801 | val | **16.0** (.999) / 16.1 (.9993) / 16.6 (.9995) / 18.1 (.9997) | 32.2 (+1.0 extra EMAs) | 3+3 blocks/level, one skip each, widths (32, 44, 44); clean, slightly smoother |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -299,6 +301,11 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   max(1 - EMA_DECAY, 1/(step+1)), that the model ends up holding exactly the EMA (not the raw weights), and that
   generate() is finite. The CPU attempt was stopped: CPU compile took over 2 of our 4 cores and slowed the GPU runs;
   it is run on the GPU after 033/034 finish.
+- final/lab06_final.py smoke test on the GPU after 033/034 finished (tools/final_smoke.py, 100 updates): passed.
+  EMA update weight exactly 1/(step+1) at every update; the model ends up holding exactly the EMA, not the raw
+  weights; generate() finite. First-batch loss 1.268, the same as 011's 1.2677, so it follows the same RNG path.
+  (The first attempt flagged 200 lerp calls: AdamW's foreach path also calls torch._foreach_lerp_ for its first
+  moment; the test now counts only calls on the model's own parameters.)
 
 ## Stage conclusions
 
@@ -367,3 +374,9 @@ with softer, partly washed-out samples. 32x32 attention (031) was worse (16.1, +
 EMA 0.9995 weights at 10k / 15k / 20k: 030 28.5 / 21.2 / 19.6 and 031 24.3 / 17.6 / 16.1. KID falls about 27 %
 from 10k to 15k but only 7-8 % (~1.5 KID, inside the noise band) from 15k to 20k, so the curve is flattening
 fast: we are mostly capacity/architecture-limited, not budget-limited. Incumbent unchanged: exp_011 (14.4).
+
+**Stage 10 (turn 011).** Spending the third up-block's parameters elsewhere did not help: 033 (2 up blocks/level,
+wider) 16.3 and 034 (3+3 blocks with one skip each, deeper) 16.0, both +11-13 %, just beyond the tie band. Both
+removed ADM's extra skips from the input conv and the downsampled maps; with this and 013/021/026/027/029/031, every
+reallocation of 011's ~1M parameters has tied or lost. Incumbent unchanged: exp_011 (14.4). The final pipeline is
+ready: final/lab06_final.py = exp_011 cleaned, checks OK, smoke test passed.

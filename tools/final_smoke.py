@@ -10,8 +10,10 @@ g["CONFIG"]["steps"] = n
 torch.manual_seed(3801)
 model = ns["build_model"]().to(device)
 calls, real_lerp = [], torch._foreach_lerp_
-def lerp(ema, params, weight):
-    calls.append((ema, weight, [p.detach().clone() for p in params]))
+model_params = list(model.parameters())
+def lerp(ema, params, weight):  # AdamW's foreach path also lerps (its first moment, towards the gradients)
+    if len(params) == len(model_params) and all(a is b for a, b in zip(params, model_params)):
+        calls.append((ema, weight, [p.detach().clone() for p in params]))
     return real_lerp(ema, params, weight)
 torch._foreach_lerp_ = lerp
 history = ns["train"](model, device)
