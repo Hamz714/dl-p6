@@ -9,6 +9,6 @@ __pycache__/
 bridge/.lock
 runs/*/samples/batch-0[2-9].png
 runs/*/samples/batch-10.png
-!final/*.zip
+final/submit/
 bridge/outbox/*.raw.json
 bridge/outbox/*.stderr.log
