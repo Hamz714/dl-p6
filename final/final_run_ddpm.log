@@ -10,3 +10,9 @@ W1111 14:08:56.172000 1465099 torch/_inductor/utils.py:1806] [0/0] Not enough SM
 16000 / 20000: loss 0.0896
 18000 / 20000: loss 0.0503
 20000 / 20000: loss 0.0703
+KID x 1000: 10.384
+{
+  "kid": 0.010384082794189453,
+  "samples": 1000
+}
+Submission: /home3/xmzj54/p6/final/submit/lab-06-xmzj54.zip
