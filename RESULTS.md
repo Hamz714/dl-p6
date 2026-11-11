@@ -35,6 +35,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_023_flow_noflip | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 15.8 (EMA .999) / **15.3** (.9995) / 17.2 (.9998) / 47.6 (.9999) | 28.3 (+2.0 extra EMAs) | 011 without flips; clean, like 011, slightly softer. Rerun after the runner bug (crashed attempt: .9995 = 15.27) |
 | exp_024_flow_beta2 | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 15.2 (.999) / 14.6 (.9993) / **14.2** (.9995) / 14.7 (.9997) / 16.8 (.9998) | 26.3 (+1.9 extra EMAs) | 011 + AdamW beta2 0.999; clean, like 011 |
 | exp_026_flow_lowres | flow | 944,755 (+16 buf) | 20,000 | 3801 | val | 19.7 (.999) / 19.4 (.9993) / **19.3** (.9995) / 19.8 (.9997) / 22.5 (.9998) | 25.3 (+2.2 extra EMAs) | (32, 40, 40, 40), blocks (1, 2, 2, 2), attn 16/8/4; softer, blurrier detail, shapes no better |
+| exp_027_flow_convnext | flow | 935,691 (+24 buf) | 20,000 | 3801 | val | **16.0** (.999) / 16.1 (.9993) / 16.3 (.9995) / 20.3 (.9997) | 63.4 (+2.7 extra EMAs) | ConvNeXt blocks, (48, 56, 64), 2/level, expand 4; clean, slightly soft. ~5.4 upd/s shared |
+| exp_029_flow_convnext_deep | flow | 895,491 (+20 buf) | 20,000 | 3801 | val | **16.3** (.999) / 16.7 (.9993) / 17.4 (.9995) / 22.2 (.9997) | 69.2 (+1.3 extra EMAs) | ConvNeXt blocks, (40, 56, 56), 3/level, expand 3; clean, smooth, a little blurrier. ~4.6 upd/s shared |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -254,6 +256,12 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   linear predictor (MSE 0.25 / 0.80 / 1.08 at t = 0 / 0.5 / 0.96 vs 1.25 for a zero output). Time embedding unchanged.
 - Prepared (b) exp_031_flow_attn32: 011 + one head-32 self-attention layer in the last 32x32 encoder block
   (down level 0, block 1), 985,955 values, no trimming needed (+4.3k).
+- GPU smoke tests after 027/029 finished (each alone, 300 updates): 031_flow_attn32 18.8 upd/s, 767 MiB vs
+  030 (011's network plus a few elementwise ops; the speed reference) 18.2 upd/s, 416 MiB, i.e. no slowdown
+  (threshold 0.6x). 030_flow_precond paired with 011 (same initialisation, batches and noise): mean logged loss
+  0.365 vs 0.289 over updates 200-300 (+26 %), then 0.240 vs 0.227 over 667-1000 (+6 %, 1,000-update runs). It
+  starts lower (first-batch loss 0.80 vs 1.27) but learns more slowly at first; the gap is closing. Not a stop
+  signal, but no early evidence of a gain either.
 
 ## Stage conclusions
 
@@ -308,3 +316,11 @@ Its finer EMA grid gives a smooth optimum at 0.9995 (15.2 / 14.6 / 14.2 / 14.7 /
 Shifting capacity to a 4x4 level (026) was clearly worse (19.3, +34 %) with blurrier samples: like 021
 (capacity to 32 px, 15.6), moving width away from 011's balanced 16/8-px levels hurts. Incumbent unchanged:
 exp_011 (14.4); 024 is an equal alternative.
+
+**Stage 8 (turn 009).** ConvNeXt-style blocks did not beat the 3x3 residual blocks: 027 (wide, 2 per level) 16.0
+and 029 (deep, 3 per level) 16.3, both at EMA 0.999 (+11 % and +13 %, just beyond the tie band), with clean but
+slightly soft samples. They also cost ~2.3x 011's GPU time (depthwise 7x7 + 4x MLPs at 32 px are bandwidth-bound
+on this slice). Block type, layout (013/021/026), optimiser (018/024), regularisation (019/023) and schedule
+(012/016/017) have now all tied or lost against exp_011 (14.4), and the real-data floor (-0.02) says the gap is
+model error. The two untried directions are input/output scaling (030, preconditioning) and full-resolution
+attention (031), both on the 011 network at 011's speed.

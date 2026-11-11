@@ -1,0 +1,13 @@
+1 / 1000: loss 0.8012
+100 / 1000: loss 0.6110
+200 / 1000: loss 0.3968
+300 / 1000: loss 0.3416
+400 / 1000: loss 0.2658
+500 / 1000: loss 0.2492
+600 / 1000: loss 0.2603
+700 / 1000: loss 0.2516
+800 / 1000: loss 0.2355
+900 / 1000: loss 0.2505
+1000 / 1000: loss 0.2426
+exps/exp_030_flow_precond.py: compile+first update 30s; steady 13.01 upd/s; 1000 updates in 106.6s (incl. compile) -> 9.39 upd/s; peak mem 416 MiB; generate(50) 2.3s; extra EMAs [0.999, 0.9993, 0.9997]; last loss [1000, 0.242579]
+loss at 1000: 0.2426; mean of 14 logged losses after update 666: 0.2403; max 0.8026
