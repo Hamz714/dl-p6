@@ -16,3 +16,9 @@
 01:24:29 }
 01:24:29 Submission: /home3/xmzj54/p6/runs/exp_034_flow_lean_deep_s3801_validation.zip
 01:24:29 RESULT {"exp": "exp_034_flow_lean_deep", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 16.583, "params": 983743, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.2, "finished": "2026-11-11 01:24:29"}
+01:24:50 KID x 1000: 15.971
+01:24:50 RESULT {"exp": "exp_034_flow_lean_deep", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 15.971, "params": 983743, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.5, "finished": "2026-11-11 01:24:50"}
+01:25:11 KID x 1000: 16.148
+01:25:11 RESULT {"exp": "exp_034_flow_lean_deep", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 16.148, "params": 983743, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.9, "finished": "2026-11-11 01:25:11"}
+01:25:32 KID x 1000: 18.088
+01:25:32 RESULT {"exp": "exp_034_flow_lean_deep", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 18.088, "params": 983743, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.2, "finished": "2026-11-11 01:25:32"}
