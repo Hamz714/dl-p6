@@ -10,3 +10,14 @@
 16:46:03 16000 / 20000: loss 0.0429
 16:48:25 18000 / 20000: loss 0.0586
 16:50:47 20000 / 20000: loss 0.0496
+16:52:43 KID x 1000: 9.568
+16:52:43 {
+16:52:43   "kid": 0.009568452835083008,
+16:52:43   "samples": 1000
+16:52:43 }
+16:52:43 Submission: /home3/xmzj54/p6/runs/exp_043_ddpm_v_mp_noflip_s3801_validation.zip
+16:52:43 RESULT {"exp": "exp_043_ddpm_v_mp_noflip", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 9.568, "params": 927218, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 26.7, "finished": "2026-11-11 16:52:43"}
+16:54:21 KID x 1000: 10.713
+16:54:21 RESULT {"exp": "exp_043_ddpm_v_mp_noflip", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 10.713, "params": 927218, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 28.3, "finished": "2026-11-11 16:54:21"}
+16:55:59 KID x 1000: 10.175
+16:55:59 RESULT {"exp": "exp_043_ddpm_v_mp_noflip", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 10.175, "params": 927218, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.01, "weight_decay": 0.0}, "minutes": 29.9, "finished": "2026-11-11 16:55:59"}
