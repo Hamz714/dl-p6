@@ -12,3 +12,4 @@ runs/*/samples/batch-10.png
 final/submit/
 bridge/outbox/*.raw.json
 bridge/outbox/*.stderr.log
+.nfs*
