@@ -45,6 +45,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_037_ddpm_v | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 9.1 (.999) / 8.8 (.9993) / **8.7** (.9995) / 9.2 (.9997) | 29.6 (+3.7 extra EMAs) | 011 net + v-prediction inside forward; no colour casts, sharp, coherent horses |
 | exp_038_ddpm_v_mp | ddpm | 927,218 (+16 buf) | 20,000 | 3801 | val | 9.6 (.999) / 8.8 (.9993) / **8.2** (.9995) / 9.2 (.9997) | 26.5 (+5.0 extra EMAs) | 015 MP net + v-prediction, lr 1e-2; no colour casts, same quality as 037 |
 | exp_039_ddpm_v_shared | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 10.2 (.999) / 9.9 (.9993) / **9.8** (.9995) / 10.3 (.9997) | 30.5 (+3.2 extra EMAs) | 037 + shared-weight repeats (5 blocks x2); clean, natural colours, like 037 |
+| exp_040_ddpm_v_grouped | ddpm | 952,795 (+16 buf) | 20,000 | 3801 | val | 13.7 (.999) / **13.2** (.9993) / 13.3 (.9995) / 15.0 (.9997) | 46.6 (+7.9 extra EMAs) | 037 with groups=2 3x3 convs, 3 blocks/level, (32, 48, 56); natural colours, softer / mushier shapes |
+| exp_041_ddpm_v_experts | ddpm | 925,510 (+24 buf) | 20,000 | 3801 | val | 14.5 (.999) / 14.1 (.9993) / **13.7** (.9995) / 13.8 (.9997) | 47.7 (+7.3 extra EMAs) | two (24, 32, 32) U-Nets split at t > 0.495; natural colours, softer / mushier shapes |
 | **FINAL (DDPM-v)** final/submit/lab06_final.py | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | **10.38** (single EMA 0.9995) | ~31 | = 037 recipe, plain run(); clean, natural-colour horses |
 | **FINAL** final/submit/lab06_final.py | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **15.50** (single EMA 0.9995) | ~27 | plain run() from final/submit; clean, varied horses, natural colours |
 
@@ -379,6 +381,9 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
 - Prepared exp_042_ddpm_v_noflip (037 without flips; 981,667 values; check_fixed OK) for after the restart.
   Reason: the real-data floor (~0) says matching the exact training distribution costs nothing on this metric, and
   DDPM's 100-step stochastic sampler may reward an exact-distribution fit more than flow did (flow no-flip was a tie).
+- Prepared exp_043_ddpm_v_mp_noflip (038 MP network without flips; 927,234 values; check_fixed OK). The next pair
+  is 042 + 043: the no-flip lever on both architectures, as 037/038 established DDPM-v. Agreement across two
+  networks is stronger evidence than one run in the 10-20 % noise regime.
 
 ## Stage conclusions
 
@@ -478,3 +483,9 @@ code_sha256 matches, task ddpm, 981,651 params + 16 buffers, 20,000 updates, bat
 lab-06-xmzj54_flow.zip. The same recipe gave 8.67 (037) and 10.38 (final): at KID ~9 the run-to-run spread (GPU
 non-determinism + 1,000-sample KID) is about +-1-2, i.e. 10-20 %, wider than the 10 % tie band assumed so far.
 Shared-weight depth (039) 9.8 sits inside that spread: a tie, no evidence of gain. Incumbent stays 037 (the final).
+
+**Stage 14 (turn 015).** Both capacity reallocations under DDPM-v were clearly worse, beyond even the 20 % band:
+grouped convs spent on depth (040) 13.2 and t-dependent experts (041) 13.7, against 037's 8.7 (final 10.4).
+Halving the per-conv capacity (grouped) or the per-expert capacity (experts) hurts more than the extra depth or
+specialisation helps; shared-weight depth (039, 9.8) was the only neutral one. Not <= 7.0: the final stays on 037.
+The turn ended with nothing running.
