@@ -47,6 +47,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_039_ddpm_v_shared | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 10.2 (.999) / 9.9 (.9993) / **9.8** (.9995) / 10.3 (.9997) | 30.5 (+3.2 extra EMAs) | 037 + shared-weight repeats (5 blocks x2); clean, natural colours, like 037 |
 | exp_040_ddpm_v_grouped | ddpm | 952,795 (+16 buf) | 20,000 | 3801 | val | 13.7 (.999) / **13.2** (.9993) / 13.3 (.9995) / 15.0 (.9997) | 46.6 (+7.9 extra EMAs) | 037 with groups=2 3x3 convs, 3 blocks/level, (32, 48, 56); natural colours, softer / mushier shapes |
 | exp_041_ddpm_v_experts | ddpm | 925,510 (+24 buf) | 20,000 | 3801 | val | 14.5 (.999) / 14.1 (.9993) / **13.7** (.9995) / 13.8 (.9997) | 47.7 (+7.3 extra EMAs) | two (24, 32, 32) U-Nets split at t > 0.495; natural colours, softer / mushier shapes |
+| exp_043_ddpm_v_mp_noflip | ddpm | 927,218 (+16 buf) | 20,000 | 3801 | val | 10.7 (.999) / 10.2 (.9993) / **9.6** (.9995) / 10.1 (.9997) | 26.7 (+4.9 extra EMAs) | 038 MP net without flips; clean, natural colours, like 037/038 |
+| exp_044_ddpm_v_lr2e3 | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 10.8 (.999) / 10.5 (.9993) / **10.2** (.9995) / 11.2 (.9997) | 29.6 (+3.7 extra EMAs) | 037 at constant lr 2e-3; clean, natural colours, very slightly softer |
 | **FINAL (DDPM-v)** final/submit/lab06_final.py | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | **10.38** (single EMA 0.9995) | ~31 | = 037 recipe, plain run(); clean, natural-colour horses |
 | **FINAL** final/submit/lab06_final.py | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **15.50** (single EMA 0.9995) | ~27 | plain run() from final/submit; clean, varied horses, natural colours |
 
@@ -496,3 +498,8 @@ specialisation helps; shared-weight depth (039, 9.8) was the only neutral one. N
 The turn ended with nothing running.
 Takeaway: at this budget, spending parameters on depth (grouped convs) or on experts hurt; capacity per
 convolution matters more than block count or specialisation.
+
+**Stage 15 (turn 016).** Both ties under the 20 % band (7.0-10.4): no flips on the MP network (043) 9.6 vs 038's 8.2
+with flips, and lr 2e-3 on 037 (044) 10.2 vs 8.7 (paired training loss within 1 % of 037's throughout). Neither is
+<= 7.0, so the final stays on 037 (banked 10.38). Takeaway: the flip and LR levers are flat for DDPM-v too; the
+DDPM-v family (037, 038, 039, 043, 044, final) clusters at 8.2-10.4, a spread consistent with run-to-run noise.

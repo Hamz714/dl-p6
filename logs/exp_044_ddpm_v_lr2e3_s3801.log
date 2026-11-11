@@ -17,3 +17,9 @@
 16:55:37 }
 16:55:37 Submission: /home3/xmzj54/p6/runs/exp_044_ddpm_v_lr2e3_s3801_validation.zip
 16:55:37 RESULT {"exp": "exp_044_ddpm_v_lr2e3", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 10.203, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.002, "weight_decay": 0.0}, "minutes": 29.6, "finished": "2026-11-11 16:55:37"}
+16:57:24 KID x 1000: 10.778
+16:57:24 RESULT {"exp": "exp_044_ddpm_v_lr2e3", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 10.778, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.002, "weight_decay": 0.0}, "minutes": 31.3, "finished": "2026-11-11 16:57:24"}
+16:58:28 KID x 1000: 10.458
+16:58:28 RESULT {"exp": "exp_044_ddpm_v_lr2e3", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 10.458, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.002, "weight_decay": 0.0}, "minutes": 32.4, "finished": "2026-11-11 16:58:28"}
+16:59:23 KID x 1000: 11.183
+16:59:23 RESULT {"exp": "exp_044_ddpm_v_lr2e3", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 11.183, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.002, "weight_decay": 0.0}, "minutes": 33.3, "finished": "2026-11-11 16:59:23"}
