@@ -41,6 +41,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_031_flow_attn32 | flow | 985,939 (+16 buf) | 20,000 | 3801 | val | 16.9 (.999) / 16.5 (.9993) / **16.1** (.9995) / 16.9 (.9997); snapshots .9995: 24.3 @10k, 17.6 @15k | 33.5 (+1.9 extra EMAs/snapshots) | 011 + attention in the last 32x32 encoder block; clean, sharp, like 011 |
 | exp_033_flow_lean | flow | 984,711 (+20 buf) | 20,000 | 3801 | val | 16.4 (.999) / **16.3** (.9993) / 16.4 (.9995) / 18.3 (.9997) | 29.3 (+1.9 extra EMAs) | 2 up blocks/level, one skip each, widths (40, 52, 52); clean, slightly soft |
 | exp_034_flow_lean_deep | flow | 983,743 (+16 buf) | 20,000 | 3801 | val | **16.0** (.999) / 16.1 (.9993) / 16.6 (.9995) / 18.1 (.9997) | 32.2 (+1.0 extra EMAs) | 3+3 blocks/level, one skip each, widths (32, 44, 44); clean, slightly smoother |
+| exp_035_flow_lr6e4 | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 18.8 (.999) / 18.3 (.9993) / **18.0** (.9995) / 18.0 (.9997) | 26.7 (+0.9 extra EMAs) | 011 at constant lr 6e-4 |
+| **FINAL** final/submit/lab06_final.py | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **15.50** (single EMA 0.9995) | ~27 | plain run() from final/submit; clean, varied horses, natural colours |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -395,3 +397,12 @@ wider) 16.3 and 034 (3+3 blocks with one skip each, deeper) 16.0, both +11-13 %,
 removed ADM's extra skips from the input conv and the downsampled maps; with this and 013/021/026/027/029/031, every
 reallocation of 011's ~1M parameters has tied or lost. Incumbent unchanged: exp_011 (14.4). The final pipeline is
 ready: final/lab06_final.py = exp_011 cleaned, checks OK, smoke test passed.
+
+**Stage 11 (turn 012).** Final zip banked: final/submit/lab-06-xmzj54.zip (2,188,038 bytes, sha256
+e4650c221c2e474eea707b3d89775f6def628e05e318a1f032956602d3b5a970), KID x1000 15.50, 981,651 params + 16 buffers,
+20,000 updates, batch 64, seed 3801. It holds exactly lab-06-code.py, lab-06-results.json and samples/batch-01..10.png;
+lab-06-code.py is byte-identical to final/submit/lab06_final.py (18,191 bytes, sha256
+841ac006f6ecaea43d5d8e9e0414e3071ebf3c34a8bfbdc4cdd4d3177aeb0e6d), which matches the JSON's code_sha256.
+15.50 vs exp_011's 14.4 (+8 %) is within KID noise: GPU kernels are not bit-deterministic, and 011's EMA was
+not warm-started. Constant lr 6e-4 (035) was clearly worse (18.0, +25 %); with 012 (2e-3 + cosine, 18.0), the
+constant 1e-3 is at the optimum from both sides. exp_036 (power EMA) is prepared but expected to tie.

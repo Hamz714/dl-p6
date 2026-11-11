@@ -8,3 +8,17 @@
 01:54:54 14000 / 20000: loss 0.1877
 01:57:27 16000 / 20000: loss 0.1845
 02:00:00 18000 / 20000: loss 0.1878
+02:02:31 20000 / 20000: loss 0.1799
+02:03:17 KID x 1000: 18.024
+02:03:17 {
+02:03:17   "kid": 0.01802372932434082,
+02:03:17   "samples": 1000
+02:03:17 }
+02:03:17 Submission: /home3/xmzj54/p6/runs/exp_035_flow_lr6e4_s3801_validation.zip
+02:03:17 RESULT {"exp": "exp_035_flow_lr6e4", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 18.024, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.0006, "weight_decay": 0.0}, "minutes": 26.7, "finished": "2026-11-11 02:03:17"}
+02:03:37 KID x 1000: 18.752
+02:03:37 RESULT {"exp": "exp_035_flow_lr6e4", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 18.752, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.0006, "weight_decay": 0.0}, "minutes": 27.0, "finished": "2026-11-11 02:03:37"}
+02:03:56 KID x 1000: 18.329
+02:03:56 RESULT {"exp": "exp_035_flow_lr6e4", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 18.329, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.0006, "weight_decay": 0.0}, "minutes": 27.3, "finished": "2026-11-11 02:03:56"}
+02:04:15 KID x 1000: 18.041
+02:04:15 RESULT {"exp": "exp_035_flow_lr6e4", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 18.041, "params": 981651, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.0006, "weight_decay": 0.0}, "minutes": 27.6, "finished": "2026-11-11 02:04:15"}

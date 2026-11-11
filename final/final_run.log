@@ -8,3 +8,10 @@
 14000 / 20000: loss 0.1875
 16000 / 20000: loss 0.1833
 18000 / 20000: loss 0.1875
+20000 / 20000: loss 0.1798
+KID x 1000: 15.502
+{
+  "kid": 0.015502214431762695,
+  "samples": 1000
+}
+Submission: /home3/xmzj54/p6/final/submit/lab-06-xmzj54.zip
