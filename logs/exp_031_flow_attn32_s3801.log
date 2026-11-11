@@ -7,3 +7,16 @@
 00:29:00 12000 / 20000: loss 0.1692
 00:32:32 14000 / 20000: loss 0.1953
 00:35:47 16000 / 20000: loss 0.2132
+00:38:25 18000 / 20000: loss 0.1899
+00:40:13 20000 / 20000: loss 0.1898
+00:40:45 KID x 1000: 16.102
+00:40:45 {
+00:40:45   "kid": 0.016102313995361328,
+00:40:45   "samples": 1000
+00:40:45 }
+00:40:45 Submission: /home3/xmzj54/p6/runs/exp_031_flow_attn32_s3801_validation.zip
+00:40:45 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 16.102, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.5, "finished": "2026-11-11 00:40:45"}
+00:41:09 KID x 1000: 16.891
+00:41:09 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 16.891, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.9, "finished": "2026-11-11 00:41:09"}
+00:41:32 KID x 1000: 16.462
+00:41:32 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 16.462, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 34.3, "finished": "2026-11-11 00:41:32"}
