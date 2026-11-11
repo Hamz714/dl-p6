@@ -44,6 +44,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_035_flow_lr6e4 | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 18.8 (.999) / 18.3 (.9993) / **18.0** (.9995) / 18.0 (.9997) | 26.7 (+0.9 extra EMAs) | 011 at constant lr 6e-4 |
 | exp_037_ddpm_v | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 9.1 (.999) / 8.8 (.9993) / **8.7** (.9995) / 9.2 (.9997) | 29.6 (+3.7 extra EMAs) | 011 net + v-prediction inside forward; no colour casts, sharp, coherent horses |
 | exp_038_ddpm_v_mp | ddpm | 927,218 (+16 buf) | 20,000 | 3801 | val | 9.6 (.999) / 8.8 (.9993) / **8.2** (.9995) / 9.2 (.9997) | 26.5 (+5.0 extra EMAs) | 015 MP net + v-prediction, lr 1e-2; no colour casts, same quality as 037 |
+| exp_039_ddpm_v_shared | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 10.2 (.999) / 9.9 (.9993) / **9.8** (.9995) / 10.3 (.9997) | 30.5 (+3.2 extra EMAs) | 037 + shared-weight repeats (5 blocks x2); clean, natural colours, like 037 |
+| **FINAL (DDPM-v)** final/submit/lab06_final.py | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | **10.38** (single EMA 0.9995) | ~31 | = 037 recipe, plain run(); clean, natural-colour horses |
 | **FINAL** final/submit/lab06_final.py | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **15.50** (single EMA 0.9995) | ~27 | plain run() from final/submit; clean, varied horses, natural colours |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
@@ -455,3 +457,11 @@ the way (e.g. 0.056-0.057 at 6k for all three), yet samples changed from saturat
 100.9) to clean, natural-colour horses. The ε→x0 amplification at high noise was the whole failure, and the
 fixed 100-step stochastic sampler with x0 clipping now works for us. The incumbent becomes DDPM-v (037, the
 simpler of the tie). The banked flow zip (15.50) is now clearly beaten.
+
+**Stage 13 (turn 014).** Final re-banked on DDPM-v: final/submit/lab-06-xmzj54.zip (2,156,777 bytes, sha256
+67cdf7f82d68b5c4f712602e5d070726a44d61172dac8ade4365ca059b89833c), KID x1000 10.38; lab-06-code.py byte-identical to
+final/submit/lab06_final.py (18,682 bytes, sha256 4dccf648a54e7d1bf649813958c94162312b64b8e739166cde4a2da6d9f6aa0e), JSON
+code_sha256 matches, task ddpm, 981,651 params + 16 buffers, 20,000 updates, batch 64, seed 3801. The flow zip is kept as
+lab-06-xmzj54_flow.zip. The same recipe gave 8.67 (037) and 10.38 (final): at KID ~9 the run-to-run spread (GPU
+non-determinism + 1,000-sample KID) is about +-1-2, i.e. 10-20 %, wider than the 10 % tie band assumed so far.
+Shared-weight depth (039) 9.8 sits inside that spread: a tie, no evidence of gain. Incumbent stays 037 (the final).

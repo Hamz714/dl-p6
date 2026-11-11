@@ -10,3 +10,16 @@
 14:37:23 16000 / 20000: loss 0.0890
 14:39:36 18000 / 20000: loss 0.0502
 14:41:33 20000 / 20000: loss 0.0704
+14:42:49 KID x 1000: 9.809
+14:42:49 {
+14:42:49   "kid": 0.009808778762817383,
+14:42:49   "samples": 1000
+14:42:49 }
+14:42:49 Submission: /home3/xmzj54/p6/runs/exp_039_ddpm_v_shared_s3801_validation.zip
+14:42:49 RESULT {"exp": "exp_039_ddpm_v_shared", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 9.809, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 30.5, "finished": "2026-11-11 14:42:49"}
+14:43:54 KID x 1000: 10.158
+14:43:54 RESULT {"exp": "exp_039_ddpm_v_shared", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 10.158, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 31.6, "finished": "2026-11-11 14:43:54"}
+14:44:59 KID x 1000: 9.864
+14:44:59 RESULT {"exp": "exp_039_ddpm_v_shared", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 9.864, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.7, "finished": "2026-11-11 14:44:59"}
+14:46:04 KID x 1000: 10.340
+14:46:04 RESULT {"exp": "exp_039_ddpm_v_shared", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 10.34, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.7, "finished": "2026-11-11 14:46:04"}
