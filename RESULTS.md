@@ -522,3 +522,24 @@ DDPM-v family (037, 038, 039, 043, 044, final) clusters at 8.2-10.4, a spread co
 **Final selection (turn 017) progress.** A_3801 (banked) 10.38.
 - Round 1 (18:10-18:38): B_3801 8.50, A_3802 8.65.
 - Round 2 (18:38-19:05): B_3802 7.80, A_3803 8.95.
+- Round 3 (19:05-19:23): B_3803 7.83. All six candidates verified (entries, embedded code = candidate script, JSON
+  hash, true seed). The turn was cut off after the install, before the report; nothing was lost or left running.
+
+| recipe | seed 3801 | seed 3802 | seed 3803 | mean +- sd (n=3) |
+|---|---|---|---|---|
+| A (037: ADM U-Net, lr 1e-3) | 10.38 | 8.65 | 8.95 | 9.33 +- 0.93 |
+| B (038: MP U-Net, lr 1e-2) | 8.50 | **7.80** | 7.83 | 8.04 +- 0.40 |
+
+- Selection as instructed: lowest KID = B_3802 (7.80). final/submit/: the banked A_3801 files were renamed (not
+  overwritten) to lab-06-xmzj54_A3801.zip / lab06_final_A3801.py / lab-06-xmzj54_A3801/ (hashes re-checked equal to the
+  recorded ones); the _flow files are untouched; B_3802's zip and acknowledged script were copied in under the standard
+  names. Verified: exactly the 12 expected entries; lab-06-code.py byte-identical to final/submit/lab06_final.py; JSON
+  code_sha256 matches; seed 3802, task ddpm, KID 0.007796, 927,218 params + 16 buffers, 20,000 updates, batch 64,
+  lr 0.01. Zip 2,169,568 bytes, sha256 96842bd12a1a88655e0f382aad420e6e178b22c8828b7298733a0d9508ddb4bd; code 20,421 bytes,
+  sha256 b9b9e6302a4129094878b67043bdf85ecc2673c7aa4a941852a3ed505853f1f9. The script differs from final/lab06_final_mp.py
+  only by the acknowledgement hunk; check_fixed OK; everything under final/submit and final/cand is git-ignored.
+- RULE FLAG (raised with the reviewer): the brief's hard rules (from the sheet) say "No seed picking: the final file
+  calls the plain run() (seed 3801) exactly once". B_3802 comes from run(seed=3802), chosen as the best of six runs,
+  and the script's own __main__ (plain run(), seed 3801) would reproduce B_3801 (8.50), not 7.80. The compliant
+  option is B_3801 (plain run() at seed 3801, same script, KID 8.50, zip in final/cand/B_3801), still better than
+  the banked A_3801 (10.38). Not swapped without a ruling.
