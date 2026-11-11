@@ -385,6 +385,11 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   is 042 + 043: the no-flip lever on both architectures, as 037/038 established DDPM-v. Agreement across two
   networks is stronger evidence than one run in the 10-20 % noise regime.
 
+- Turn 016 (server restarted ~16:20, now gpu11; the slice is shared with 4-5 other users' processes). 042 skipped by
+  the reviewer (same lever as 043 on the weaker network). exp_044_ddpm_v_lr2e3 = 037 with constant lr 2e-3
+  (warm-up unchanged). Smoke tests together (200 updates): 044 17.6 upd/s, no spike/NaN, mean loss over the last
+  third 0.100 (037's smoke: 0.126), so 2e-3 kept; 043 20.2 upd/s, stable. 043 + 044 launched together at 16:26.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
@@ -489,3 +494,5 @@ grouped convs spent on depth (040) 13.2 and t-dependent experts (041) 13.7, agai
 Halving the per-conv capacity (grouped) or the per-expert capacity (experts) hurts more than the extra depth or
 specialisation helps; shared-weight depth (039, 9.8) was the only neutral one. Not <= 7.0: the final stays on 037.
 The turn ended with nothing running.
+Takeaway: at this budget, spending parameters on depth (grouped convs) or on experts hurt; capacity per
+convolution matters more than block count or specialisation.
