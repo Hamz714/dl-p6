@@ -520,3 +520,4 @@ with flips, and lr 2e-3 on 037 (044) 10.2 vs 8.7 (paired training loss within 1 
 DDPM-v family (037, 038, 039, 043, 044, final) clusters at 8.2-10.4, a spread consistent with run-to-run noise.
 
 **Final selection (turn 017) progress.** A_3801 (banked) 10.38.
+- Round 1 (18:10-18:38): B_3801 8.50, A_3802 8.65.
