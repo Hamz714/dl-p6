@@ -296,6 +296,7 @@ def sample_flow(model, labels, steps=25, device='cpu', generator=None, shape=(3,
 
 # %% Training
 EXTRA_EMA = {}  # decay -> state_dict of the other tracked EMAs, evaluated separately by the experiment runner
+SNAPSHOT_AT, SNAPSHOTS = (), {}  # analysis only: the runner sets SNAPSHOT_AT to copy the primary EMA mid-run
 
 
 def train(model, device):
@@ -325,6 +326,8 @@ def train(model, device):
         with torch.no_grad():
             for ema, decay in zip(emas, EMA_DECAYS):  # running mean until 1/(1-decay) updates: no init bias
                 torch._foreach_lerp_(ema, params, max(1 - decay, 1 / (step + 1)))
+        if step in SNAPSHOT_AT:
+            SNAPSHOTS[step] = [e.detach().cpu().clone() for e in emas[0]]
         if step == 1 or step % max(1, CONFIG["steps"]//40) == 0 or step == CONFIG["steps"]:
             history.append([step, round(loss.item(), 6)])
         if step == 1 or step % max(1, CONFIG["steps"]//10) == 0 or step == CONFIG["steps"]:

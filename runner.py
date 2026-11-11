@@ -11,6 +11,8 @@ parser.add_argument("exp")
 parser.add_argument("--seed", type=int, default=3801)
 parser.add_argument("--split", default="validation", choices=["validation", "test"])
 parser.add_argument("--tag", default="")
+parser.add_argument("--snapshots", default="", help="analysis only: e.g. 10000,15000 = also score the primary EMA "
+                    "copied at those updates (needs the program's SNAPSHOT_AT hook)")
 args = parser.parse_args()
 
 exp = Path(args.exp).resolve()
@@ -25,6 +27,9 @@ ns = runpy.run_path(str(exp), run_name="p6_experiment")
 program, built = ns["run"].__globals__, []
 build = program["build_model"]
 program["build_model"] = lambda: built.append(build()) or built[-1]
+if args.snapshots:
+    assert "SNAPSHOT_AT" in program, "program has no SNAPSHOT_AT hook"
+    program["SNAPSHOT_AT"] = tuple(int(s) for s in args.snapshots.split(","))
 start = time.time()
 result = ns["run"](out=str(out), seed=args.seed, split=args.split, show=False)
 minutes = (time.time() - start) / 60
@@ -61,6 +66,22 @@ for decay, state in ns.get("EXTRA_EMA", {}).items():
     folder.mkdir(parents=True, exist_ok=True)
     metrics = ns["image_score"](model, folder, device, args.split)
     extra = dict(row, tag=f"ema{decay}", kid1000=round(1000 * metrics["kid"], 3),
+                 minutes=round((time.time() - start) / 60, 1), finished=time.strftime("%Y-%m-%d %H:%M:%S"))
+    with open("runs/index.jsonl", "a") as f:
+        f.write(json.dumps(extra) + "\n")
+    print("RESULT", json.dumps(extra), flush=True)
+
+# Mid-run snapshots of the primary EMA (analysis only): scored with the same image_score() path.
+for step, tensors in sorted(ns.get("SNAPSHOTS", {}).items()):
+    model = ns["build_model"]().to(device := "cuda" if ns["torch"].cuda.is_available() else "cpu")
+    names = [name for name, _ in model.named_parameters()]
+    model.load_state_dict({**built[0].state_dict(), **dict(zip(names, tensors))})
+    tag = f"snap{step}_{row['tag']}"
+    save_weights(model.state_dict(), tag)
+    folder = out / tag
+    folder.mkdir(parents=True, exist_ok=True)
+    metrics = ns["image_score"](model, folder, device, args.split)
+    extra = dict(row, tag=tag, kid1000=round(1000 * metrics["kid"], 3),
                  minutes=round((time.time() - start) / 60, 1), finished=time.strftime("%Y-%m-%d %H:%M:%S"))
     with open("runs/index.jsonl", "a") as f:
         f.write(json.dumps(extra) + "\n")
