@@ -392,6 +392,21 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   (warm-up unchanged). Smoke tests together (200 updates): 044 17.6 upd/s, no spike/NaN, mean loss over the last
   third 0.100 (037's smoke: 0.126), so 2e-3 kept; 043 20.2 upd/s, stable. 043 + 044 launched together at 16:26.
 
+- Turn 017 (decision: rerun the best recipes on new training seeds and submit the single best zip; this replaces the
+  no-repeats rule for the final only). Candidates: A = final/lab06_final.py (037 recipe, unchanged); B =
+  final/lab06_final_mp.py (038 recipe: MP U-Net, lr 1e-2, flips, single warm-started EMA 0.9995 copied into the
+  model, forced weight normalisation; header like A's, abstract for the MP layers, Karras et al. 2024 (CVPR 2024,
+  arXiv:2312.02696, verified) added; FiLM and GroupNorm refs dropped as B uses neither). B: check_fixed OK, 927,234
+  values; GPU smoke (100 updates): exact EMA path, model holds the EMA, MPConv weight RMS 0.999-1.001 after the copy.
+- Seeds go through the starter's own argument without editing anything fixed: tools/run_seed.py loads the script
+  with runpy (its __main__ block does not fire) and calls its run(seed=S), so the JSON records the true seed.
+  Checked: program_source() returns the script's exact bytes when loaded this way (A and B).
+- Isolation: final/cand/<A|B>_<seed>/ each with its own acknowledged script and data symlink; final/cand/ was added to
+  .gitignore first (check-ignore confirmed) because the scripts carry the acknowledgement. Each candidate script differs
+  from its tracked twin only by the acknowledgement hunk (A candidates are byte-identical to the banked submission
+  script); all pass check_fixed. tools/cand_rounds.sh (nohup) runs the rounds in order, two at a time:
+  B_3801 + A_3802, then B_3802 + A_3803, then B_3803; log final/cand/rounds.log. Started 18:10.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
@@ -503,3 +518,5 @@ convolution matters more than block count or specialisation.
 with flips, and lr 2e-3 on 037 (044) 10.2 vs 8.7 (paired training loss within 1 % of 037's throughout). Neither is
 <= 7.0, so the final stays on 037 (banked 10.38). Takeaway: the flip and LR levers are flat for DDPM-v too; the
 DDPM-v family (037, 038, 039, 043, 044, final) clusters at 8.2-10.4, a spread consistent with run-to-run noise.
+
+**Final selection (turn 017) progress.** A_3801 (banked) 10.38.
