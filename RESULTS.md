@@ -307,6 +307,21 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   (The first attempt flagged 200 lerp calls: AdamW's foreach path also calls torch._foreach_lerp_ for its first
   moment; the test now counts only calls on the model's own parameters.)
 
+- Turn 012 (reviewer approved final/lab06_final.py). Submission copy final/submit/lab06_final.py (git-ignored
+  directory, checked with check-ignore): only the acknowledgement placeholder line was replaced, by the reviewer's
+  wording with the names filled in (5 comment lines, max 110 chars). diff vs final/lab06_final.py is a single hunk at
+  line 21 (placeholder out, 5 comment lines in); check_fixed OK; 981,667 values. data symlink added; run once at
+  01:36 as `python lab06_final.py` from final/submit (plain run(), seed 3801), log in final/final_run.log.
+- exp_035_flow_lr6e4: 011 net and recipe with constant lr 6e-4 (same 500-update warm-up), EMA grid
+  .999/.9993/.9995/.9997; launched 01:36 alongside the final run.
+- Prepared exp_036_flow_powerema (not run): EDM2 power-function EMA, beta_t = (1 - 1/t)^(gamma+1), gamma = 6.94,
+  so that sigma_rel = sqrt((g+1)/((g+2)^2 (g+3))) = 0.10 matches fixed 0.9995 at t = 20k (std of its averaging
+  profile = 1/(1-0.9995) = 2,000 updates = 0.10 t). The fixed decays are tracked in the same run for an exact,
+  paired comparison. Expected: a tie. At t = 20k the two profiles nearly coincide (std 2,000 vs 2,000 updates,
+  mean age 2,237 vs 1,999; weight on updates before 15k 10 % vs 8 %), and with a constant LR the late iterates
+  are roughly stationary, so both average the same window. EDM2's gains come from post-hoc profile choice and
+  the interaction with LR decay, neither of which applies here.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
