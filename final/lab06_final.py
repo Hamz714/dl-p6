@@ -1,16 +1,16 @@
-# Lab 6, CIFAR-10 horses: image flow matching with a small U-Net (student xmzj54).
-# Abstract: the model learns the velocity of the linear noise-to-data path (flow matching / rectified flow) with the
-# fixed loss and 25-step Euler sampler. The network is an ADM/DDPM-style U-Net with 32/48/48 channels at 32/16/8 px,
-# two pre-activation residual blocks per level down and three up, GroupNorm, skip concatenation, self-attention at
-# 16x16, 8x8 and in the middle, and a sinusoidal time embedding applied as FiLM scale/shift; residual and output
-# convolutions start at zero. Training: AdamW (lr 1e-3, betas 0.9/0.99, no weight decay), 500-update linear warm-up
-# then constant LR, gradient clipping at 1.0, random horizontal flips, bf16 autocast, TF32 and torch.compile. An EMA
-# of the weights (decay 0.9995, a running mean for the first 2,000 updates) is copied into the model after training.
+# Lab 6, CIFAR-10 horses: DDPM with v-prediction and a small U-Net (student xmzj54).
+# Abstract: a DDPM with the fixed 100-step cosine schedule, loss and ancestral sampler (with x0 clipping). The network
+# predicts v = sqrt(a) eps - sqrt(1-a) x0, which Model.forward converts to the epsilon the fixed loss and sampler expect
+# (eps = sqrt(1-a) x_t + sqrt(a) v), avoiding epsilon-prediction's error amplification at high noise. The network is an
+# ADM-style U-Net with 32/48/48 channels at 32/16/8 px, two pre-activation residual blocks per level down and three up,
+# GroupNorm, skip concatenation, self-attention at 16x16, 8x8 and in the middle, and a sinusoidal time embedding applied
+# as FiLM scale/shift; residual and output convolutions start at zero. Training: AdamW (lr 1e-3, betas 0.9/0.99), 500-update
+# warm-up then constant LR, clipping at 1.0, random flips, bf16/TF32, torch.compile; an EMA (0.9995) is copied in at the end.
 #
 # References:
-# Lipman et al., Flow Matching for Generative Modeling, ICLR 2023, arXiv:2210.02747.
-# Liu, Gong & Liu, Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow, ICLR 2023, arXiv:2209.03003.
 # Ho, Jain & Abbeel, Denoising Diffusion Probabilistic Models, NeurIPS 2020, arXiv:2006.11239.
+# Nichol & Dhariwal, Improved Denoising Diffusion Probabilistic Models, ICML 2021, arXiv:2102.09672.
+# Salimans & Ho, Progressive Distillation for Fast Sampling of Diffusion Models, ICLR 2022, arXiv:2202.00512.
 # Dhariwal & Nichol, Diffusion Models Beat GANs on Image Synthesis, NeurIPS 2021, arXiv:2105.05233.
 # Perez et al., FiLM: Visual Reasoning with a General Conditioning Layer, AAAI 2018, arXiv:1709.07871.
 # Wu & He, Group Normalization, ECCV 2018, arXiv:1803.08494.
@@ -41,7 +41,7 @@ DATA_DIR = Path("data")
 
 # %% Model and training settings
 
-CONFIG = dict(task="flow", steps=20000, batch_size=64,
+CONFIG = dict(task="ddpm", steps=20000, batch_size=64,
               learning_rate=0.001, weight_decay=0.0)
 WARMUP, EMA_DECAY = 500, 0.9995  # linear warm-up updates; EMA decay of the weights copied into the model
 CHANNELS, BLOCKS, ATTENTION = (32, 48, 48), 2, (16, 8)  # widths at 32/16/8 px, blocks per level, attention resolutions
@@ -91,9 +91,10 @@ class Block(nn.Module):
 
 
 class Model(nn.Module):
-    """ADM/DDPM++-style U-Net: residual blocks, skip concatenation, attention at low resolution."""
+    """ADM/DDPM++-style U-Net predicting v: residual blocks, skip concatenation, attention at low resolution."""
     def __init__(self, channels=CHANNELS, blocks=BLOCKS, attention=ATTENTION):
         super().__init__()
+        self.bars = diffusion_schedule()[2].float()  # cumulative alphas for the v -> epsilon conversion (not a buffer)
         emb = 2 * channels[0]
         self.register_buffer("freqs", torch.exp(-math.log(1e4) * torch.arange(channels[0] // 2) / (channels[0] // 2)))
         self.time = nn.Sequential(nn.Linear(channels[0], emb), nn.SiLU(), nn.Linear(emb, emb), nn.SiLU())
@@ -134,7 +135,9 @@ class Model(nn.Module):
                 h = F.interpolate(h, scale_factor=2, mode="nearest")
             for block in stage:
                 h = block(torch.cat([h, skips.pop()], 1), emb)
-        return self.out(h)
+        # v-prediction (Salimans & Ho 2022): eps = sqrt(1-a) x_t + sqrt(a) v, in fp32; t = (index + 1) / 100.
+        a = self.bars.to(x.device)[(t.float() * len(self.bars)).round().long() - 1][:, None, None, None]
+        return (1 - a).sqrt() * x.float() + a.sqrt() * self.out(h).float()
 
 
 def build_model():
@@ -309,12 +312,13 @@ def sample_flow(model, labels, steps=25, device='cpu', generator=None, shape=(3,
 
 # %% Training
 def train(model, device):
-    """Flow matching with AdamW (linear warm-up, then constant LR), gradient clipping, random horizontal flips,
+    """DDPM training with AdamW (linear warm-up, then constant LR), gradient clipping, random horizontal flips,
     bf16 autocast, TF32 and torch.compile; an EMA of the weights is copied into the model at the end."""
     images, labels = image_data()
     optimiser = torch.optim.AdamW(model.parameters(), lr=CONFIG["learning_rate"], betas=(0.9, 0.99),
                                   weight_decay=CONFIG["weight_decay"])
     scheduler = torch.optim.lr_scheduler.LambdaLR(optimiser, lambda step: min(1.0, (step + 1) / WARMUP))
+    bars = diffusion_schedule(device=device)[2]
     params = list(model.parameters())
     ema = [p.detach().clone() for p in params]
     torch.backends.cuda.matmul.allow_tf32 = torch.backends.cudnn.allow_tf32 = True
@@ -326,7 +330,7 @@ def train(model, device):
         x, y = images[index].to(device), labels[index].to(device)
         x = torch.where(torch.rand(len(x), 1, 1, 1, device=device) < 0.5, x.flip(3), x)  # random horizontal flips
         with torch.autocast("cuda", dtype=torch.bfloat16, enabled=x.is_cuda):
-            loss = flow_loss(net, x, y)
+            loss = diffusion_loss(net, x, bars, y)
         optimiser.zero_grad(set_to_none=True)
         loss.backward()
         nn.utils.clip_grad_norm_(params, 1.0)
