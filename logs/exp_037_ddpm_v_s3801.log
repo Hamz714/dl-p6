@@ -19,3 +19,7 @@
 13:59:24 RESULT {"exp": "exp_037_ddpm_v", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 8.667, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 29.6, "finished": "2026-11-11 13:59:24"}
 14:01:12 KID x 1000: 9.067
 14:01:12 RESULT {"exp": "exp_037_ddpm_v", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 9.067, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 31.4, "finished": "2026-11-11 14:01:12"}
+14:02:11 KID x 1000: 8.794
+14:02:11 RESULT {"exp": "exp_037_ddpm_v", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 8.794, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 32.4, "finished": "2026-11-11 14:02:11"}
+14:03:08 KID x 1000: 9.175
+14:03:08 RESULT {"exp": "exp_037_ddpm_v", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 9.175, "params": 981651, "buffers": 16, "config": {"task": "ddpm", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.3, "finished": "2026-11-11 14:03:08"}

@@ -42,6 +42,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_033_flow_lean | flow | 984,711 (+20 buf) | 20,000 | 3801 | val | 16.4 (.999) / **16.3** (.9993) / 16.4 (.9995) / 18.3 (.9997) | 29.3 (+1.9 extra EMAs) | 2 up blocks/level, one skip each, widths (40, 52, 52); clean, slightly soft |
 | exp_034_flow_lean_deep | flow | 983,743 (+16 buf) | 20,000 | 3801 | val | **16.0** (.999) / 16.1 (.9993) / 16.6 (.9995) / 18.1 (.9997) | 32.2 (+1.0 extra EMAs) | 3+3 blocks/level, one skip each, widths (32, 44, 44); clean, slightly smoother |
 | exp_035_flow_lr6e4 | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 18.8 (.999) / 18.3 (.9993) / **18.0** (.9995) / 18.0 (.9997) | 26.7 (+0.9 extra EMAs) | 011 at constant lr 6e-4 |
+| exp_037_ddpm_v | ddpm | 981,651 (+16 buf) | 20,000 | 3801 | val | 9.1 (.999) / 8.8 (.9993) / **8.7** (.9995) / 9.2 (.9997) | 29.6 (+3.7 extra EMAs) | 011 net + v-prediction inside forward; no colour casts, sharp, coherent horses |
+| exp_038_ddpm_v_mp | ddpm | 927,218 (+16 buf) | 20,000 | 3801 | val | 9.6 (.999) / 8.8 (.9993) / **8.2** (.9995) / 9.2 (.9997) | 26.5 (+5.0 extra EMAs) | 015 MP net + v-prediction, lr 1e-2; no colour casts, same quality as 037 |
 | **FINAL** final/submit/lab06_final.py | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | **15.50** (single EMA 0.9995) | ~27 | plain run() from final/submit; clean, varied horses, natural colours |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
@@ -420,3 +422,11 @@ lab-06-code.py is byte-identical to final/submit/lab06_final.py (18,191 bytes, s
 15.50 vs exp_011's 14.4 (+8 %) is within KID noise: GPU kernels are not bit-deterministic, and 011's EMA was
 not warm-started. Constant lr 6e-4 (035) was clearly worse (18.0, +25 %); with 012 (2e-3 + cosine, 18.0), the
 constant 1e-3 is at the optimum from both sides. exp_036 (power EMA) is prepared but expected to tie.
+
+**Stage 12 (turn 013).** DDPM with v-prediction is the structural lever flow lacked: 037 (011 net) 8.7 and
+038 (MP net) 8.2 at EMA 0.9995, against flow's 14.4 (-40 % / -43 %). They tie with each other (6 %), so the gain
+comes from the task + parameterisation, not the network. Training ε-loss matched ε-prediction DDPM (010) all
+the way (e.g. 0.056-0.057 at 6k for all three), yet samples changed from saturated single-colour casts (010,
+100.9) to clean, natural-colour horses. The ε→x0 amplification at high noise was the whole failure, and the
+fixed 100-step stochastic sampler with x0 clipping now works for us. The incumbent becomes DDPM-v (037, the
+simpler of the tie). The banked flow zip (15.50) is now clearly beaten.
