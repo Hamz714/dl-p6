@@ -521,3 +521,4 @@ DDPM-v family (037, 038, 039, 043, 044, final) clusters at 8.2-10.4, a spread co
 
 **Final selection (turn 017) progress.** A_3801 (banked) 10.38.
 - Round 1 (18:10-18:38): B_3801 8.50, A_3802 8.65.
+- Round 2 (18:38-19:05): B_3802 7.80, A_3803 8.95.
