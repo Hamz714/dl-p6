@@ -558,3 +558,15 @@ once; this decision departs from it on both counts, with disclosure.
   last line run(seed=3802); check_fixed OK). tools/s_rounds.sh (nohup) runs `python lab06_final.py` in each directory,
   two at a time (S_1 + S_2, then S_3 + S_4); log final/cand/s_rounds.log. Started 20:02.
 - Pair 1 (20:02-20:29): S_1 7.81, S_2 7.53.
+- Pair 2 (20:29-20:56): S_3 7.32, S_4 7.46.
+- Selection: lowest of S_1-S_4 = S_3 (7.32); all four are below the 8.50 fallback. S runs: 7.81 / 7.53 / 7.32 / 7.46,
+  7.53 +- 0.21 (same file, same seed; the spread is GPU non-determinism). final/submit/: the B_3802 set was renamed
+  (not overwritten) to lab-06-xmzj54_B3802.zip / lab06_final_B3802.py (zip hash unchanged); the _A3801 and _flow sets
+  are kept; S_3's zip and script were copied in under the standard names. B_3801 / B_3802 zips stay in final/cand.
+- Verified: 12 expected entries; embedded lab-06-code.py byte-identical to final/submit/lab06_final.py, whose last
+  line is `    run(seed=3802)`; JSON code_sha256 matches; seed 3802, task ddpm, KID 0.007318, 927,218 params + 16
+  buffers, 20,000 updates, batch 64, lr 0.01. Zip 2,172,577 bytes, sha256
+  232bd98f03834d0f9d687e712635be7157544cb4190f610d2a7fdeaa9a4ff745; code 20,458 bytes, sha256
+  930a376288ef55a32575dc04f52d9ee23cf135d83c22b2132956112f8d311488. The script differs from the tracked
+  final/lab06_final_mp_s3802.py only by the acknowledgement hunk; check_fixed OK (with the one tolerated last line).
+  Samples: clean, varied, natural-colour horses.
