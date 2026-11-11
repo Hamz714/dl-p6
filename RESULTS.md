@@ -543,3 +543,17 @@ DDPM-v family (037, 038, 039, 043, 044, final) clusters at 8.2-10.4, a spread co
   and the script's own __main__ (plain run(), seed 3801) would reproduce B_3801 (8.50), not 7.80. The compliant
   option is B_3801 (plain run() at seed 3801, same script, KID 8.50, zip in final/cand/B_3801), still better than
   the banked A_3801 (10.38). Not swapped without a ruling.
+
+**Final runs of the seed-3802 file (turn 019).** Decision (Hamzah): the submitted file must itself produce the
+submitted score, so the seed goes into the code and the plain file is run several times, keeping the best run
+(disclosed in the abstract). Noted: the brief's sheet rule says the final file calls plain run() (seed 3801) exactly
+once; this decision departs from it on both counts, with disclosure.
+- final/lab06_final_mp_s3802.py = final/lab06_final_mp.py with two changes only: the last line is run(seed=3802), and
+  the abstract was condensed to 6 lines plus the 2-line disclosure ("Seed 3802 is set in the final line; the submitted
+  run is the best of several runs of this exact file (recipe KID x1000 8.04 +- 0.40 over seeds 3801-3803)"), 8 lines.
+- tools/check_fixed.py tolerates exactly one thing more: if the file ends with the line `    run(seed=3802)`
+  directly under `if __name__ == "__main__":`, that final line is compared as the starter's `    run()`. Negative tests
+  (another seed, text after it, a second changed line) are all DIFFERS. Result for the new file: OK; 927,234 values.
+- Acknowledged copies in final/cand/S_1..S_4 (git-ignored; diff vs the tracked file = only the acknowledgement hunk;
+  last line run(seed=3802); check_fixed OK). tools/s_rounds.sh (nohup) runs `python lab06_final.py` in each directory,
+  two at a time (S_1 + S_2, then S_3 + S_4); log final/cand/s_rounds.log. Started 20:02.

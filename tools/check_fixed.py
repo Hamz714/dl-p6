@@ -18,4 +18,8 @@ for path in sys.argv[1:]:
     cut = text.find(first)
     if cut > 0 and all(l.startswith("#") or not l.strip() for l in text[:cut].splitlines()):
         text = text[cut:]
+    # Final file only: the one permitted edit outside the editable sections is the seed in the very last line.
+    # Exactly "    run(seed=3802)" as the file's final line is compared as the starter's "    run()"; nothing else is.
+    if text.endswith('\nif __name__ == "__main__":\n    run(seed=3802)\n'):
+        text = text[:-len("    run(seed=3802)\n")] + "    run()\n"
     print(path, "OK" if parts(text) == ref else "DIFFERS")
