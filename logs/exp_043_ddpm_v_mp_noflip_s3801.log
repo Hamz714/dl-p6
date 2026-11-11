@@ -1,3 +1,5 @@
 16:26:43 W1111 16:26:43.343000 740311 torch/_inductor/utils.py:1806] [0/0] Not enough SMs to use max_autotune_gemm mode
 16:27:12 1 / 20000: loss 0.3688
 16:29:28 2000 / 20000: loss 0.0971
+16:31:50 4000 / 20000: loss 0.0586
+16:34:12 6000 / 20000: loss 0.0672
