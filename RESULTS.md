@@ -283,6 +283,23 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
 - Second capacity point exp_034_flow_lean_deep: the same one-skip-per-block decoder used for depth instead of
   width: 3 encoder + 3 decoder blocks per level, widths (32, 44, 44), 983,759 values (CPU-checked only).
 
+- Turn 011: 034 smoke-tested (200 updates, alone: 17.7 upd/s, 460 MiB, stable), then exp_033_flow_lean and
+  exp_034_flow_lean_deep launched together at 00:52 (EMA grid .999/.9993/.9995/.9997, no snapshots).
+- Final pipeline prepared (no GPU run yet): final/lab06_final.py = exp_011 cleaned. Single EMA 0.9995 (warm-started,
+  i.e. a running mean for the first 2,000 updates, so the initial weights leave no bias) copied into the model after
+  training. The EXTRA_EMA machinery, the snapshot hook and the dead DDPM branch of train() were removed;
+  STUDENT_ID = "xmzj54"; __main__ calls plain run(). Header (comments only, above the starter's first line):
+  abstract (8 lines, no KID claims), 9 verified references (arXiv ids and venues checked), and the exact line
+  `# AI acknowledgement: AI_ACK_PLACEHOLDER`. Training RNG use is identical to the warm-started-EMA experiments, and
+  011's 0.9995 EMA (14.4) is equivalent: the old init bias at 0.9995 is 0.9995^20000 ~ 5e-5.
+- tools/check_fixed.py now allows a header of comment/blank lines before the starter's first line; everything from
+  that line on is still compared byte for byte (negative tests: a non-comment header line, or one changed fixed line,
+  are both reported DIFFERS). Result for final/lab06_final.py: OK. tools/count.py: 981,667 values.
+- tools/final_smoke.py: train() smoke test that records every EMA update and checks the weights
+  max(1 - EMA_DECAY, 1/(step+1)), that the model ends up holding exactly the EMA (not the raw weights), and that
+  generate() is finite. The CPU attempt was stopped: CPU compile took over 2 of our 4 cores and slowed the GPU runs;
+  it is run on the GPU after 033/034 finish.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
