@@ -9,3 +9,16 @@
 23:44:24 16000 / 20000: loss 0.1929
 23:51:06 18000 / 20000: loss 0.1946
 23:55:09 20000 / 20000: loss 0.1786
+23:55:42 KID x 1000: 17.414
+23:55:43 {
+23:55:43   "kid": 0.017414093017578125,
+23:55:43   "samples": 1000
+23:55:43 }
+23:55:43 Submission: /home3/xmzj54/p6/runs/exp_029_flow_convnext_deep_s3801_validation.zip
+23:55:43 RESULT {"exp": "exp_029_flow_convnext_deep", "seed": 3801, "split": "validation", "tag": "ema0.9995", "kid1000": 17.414, "params": 895491, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 69.2, "finished": "2026-11-10 23:55:43"}
+23:56:09 KID x 1000: 16.283
+23:56:09 RESULT {"exp": "exp_029_flow_convnext_deep", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 16.283, "params": 895491, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 69.6, "finished": "2026-11-10 23:56:09"}
+23:56:35 KID x 1000: 16.676
+23:56:35 RESULT {"exp": "exp_029_flow_convnext_deep", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 16.676, "params": 895491, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 70.0, "finished": "2026-11-10 23:56:35"}
+23:57:01 KID x 1000: 22.182
+23:57:01 RESULT {"exp": "exp_029_flow_convnext_deep", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 22.182, "params": 895491, "buffers": 20, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 70.5, "finished": "2026-11-10 23:57:01"}
