@@ -5,3 +5,10 @@ W1111 14:09:47.628000 1465197 torch/_inductor/utils.py:1806] [0/0] Not enough SM
 60 / 200: loss 0.3587
 80 / 200: loss 0.2102
 100 / 200: loss 0.2175
+120 / 200: loss 0.2444
+140 / 200: loss 0.1589
+160 / 200: loss 0.1474
+180 / 200: loss 0.1068
+200 / 200: loss 0.1040
+exps/exp_039_ddpm_v_shared.py: compile+first update 159s; steady 11.48 upd/s; 200 updates in 176.6s (incl. compile) -> 1.13 upd/s; peak mem 483 MiB; generate(50) 6.8s; extra EMAs [0.999, 0.9993, 0.9997]; last loss [200, 0.103995]
+loss at 200: 0.1040; mean of 14 logged losses after update 133: 0.1258; max 0.4350

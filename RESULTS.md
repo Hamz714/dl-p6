@@ -340,6 +340,31 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   GPU smoke tests (200 updates, together): 037 17.6 upd/s, 416 MiB, loss@200 0.105; 038 20.1 upd/s, 445 MiB,
   0.122; extra EMAs load. Launched together at 13:29. Kill rule: NaN or diverging loss by 5k.
 
+- Turn 014 (reviewer rulings): shared-weight depth inside one feed-forward pass allowed (not re-running the whole
+  denoiser on its own output); self-conditioning not allowed; t-dependent experts allowed. 037 is the incumbent.
+- Final re-banked on 037. The flow submission was renamed first: final/submit/lab-06-xmzj54_flow.zip,
+  lab-06-xmzj54_flow/ and lab06_final_flow.py. final/lab06_final.py now has task "ddpm", the v -> epsilon
+  conversion in Model.forward (cumulative alphas from the fixed diffusion_schedule() as a plain attribute), and train()
+  calls the fixed diffusion_loss(net, x, bars, y) inside bf16 autocast; the flow branch is gone. The abstract was
+  rewritten for DDPM-v, and the references updated: added Nichol & Dhariwal 2021 (ICML, arXiv:2102.09672) and
+  Salimans & Ho 2022 (ICLR, arXiv:2202.00512), both verified; dropped Lipman 2023 and Liu 2023 (flow, no longer used).
+  check_fixed OK, 981,667 values. CPU check: forward output and loss bit-identical to exp_037's with the same
+  weights. Submission copy rebuilt with the acknowledgement lines carried over unchanged (diff: one hunk at line 21).
+  Run once at 14:08 from final/submit (plain run(), seed 3801); log final/final_run_ddpm.log.
+- exp_039_ddpm_v_shared: 037 + shared-weight depth: the width-preserving blocks at 16/8 px (down1.1, down2.0, down2.1)
+  and both middle blocks are each applied twice with the same weights (zero-initialised residual branches, so each
+  repeat starts as the identity; no extra parameters: 981,667). Reason: it keeps 037's proven network and all its
+  parameters and adds depth where global shape is formed, at low resolution where it is cheap; every parameter
+  reallocation so far has lost. Smoke test next to the final run: 11.5 upd/s (~0.85x of 037's shared speed),
+  483 MiB. Launched 14:12.
+- Prepared (a) exp_040_ddpm_v_grouped: 037 with groups=2 in both 3x3 convs of each block, the savings spent on
+  depth: 3 blocks per level (down 3, up 4), widths (32, 48, 56), 952,811 values.
+- Prepared (b) exp_041_ddpm_v_experts: two 037-style U-Nets at widths (24, 32, 32) (925,534 values in total); the
+  output comes from the high-noise expert when t > 0.495 (abar < 0.5, SNR < 1: index 49 onwards), else the low-noise one.
+  Both are evaluated and selected with torch.where (static graph for compile); within a sampler step all samples
+  share t, so each step uses one expert. CPU-checked routing. Rated below (a): capacity is the binding constraint,
+  and each expert gets under half of it.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
