@@ -324,6 +324,20 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   are roughly stationary, so both average the same window. EDM2's gains come from post-hoc profile choice and
   the interaction with LR decay, neither of which applies here.
 
+- Turn 013 (reviewer): the campaign continues (other students reportedly reach 2-5); the banked zip stays as
+  insurance. DDPM revisited with v-prediction (Salimans & Ho 2022, ICLR 2022):
+  exp_037_ddpm_v = 011 network and recipe (lr 1e-3, warm-started EMA, flips, bf16) with task "ddpm";
+  exp_038_ddpm_v_mp = 015 MP network (lr 1e-2, forced weight normalisation) with task "ddpm". Both use EMA grid
+  .999/.9993/.9995/.9997. train() calls the fixed diffusion_loss(net, x, schedule[2], y) inside bf16 autocast exactly as
+  the starter; loss, timestep distribution and the 100-step sampler are untouched. Inside Model.forward the net's
+  output is read as v and converted: eps = sqrt(1-a) x + sqrt(a) v, in fp32, with a = cumulative alpha of the fixed
+  diffusion_schedule() (computed once in __init__, kept as a plain attribute: not a parameter or buffer, so
+  it is not counted or saved), index = round(100 t) - 1. CPU checks: the mapping is exact for all 100 t values as
+  encoded by both diffusion_loss and sample_ddpm; true v gives true eps (max error 4.8e-7); the schedule is not in
+  the state_dict; parameter counts unchanged (981,667 / 927,234); the fixed loss and 100-step generate() run.
+  GPU smoke tests (200 updates, together): 037 17.6 upd/s, 416 MiB, loss@200 0.105; 038 20.1 upd/s, 445 MiB,
+  0.122; extra EMAs load. Launched together at 13:29. Kill rule: NaN or diverging loss by 5k.
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
