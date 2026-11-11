@@ -37,6 +37,8 @@ KID x 1000 on 1,000 samples, validation split unless stated. Minutes = runner wa
 | exp_026_flow_lowres | flow | 944,755 (+16 buf) | 20,000 | 3801 | val | 19.7 (.999) / 19.4 (.9993) / **19.3** (.9995) / 19.8 (.9997) / 22.5 (.9998) | 25.3 (+2.2 extra EMAs) | (32, 40, 40, 40), blocks (1, 2, 2, 2), attn 16/8/4; softer, blurrier detail, shapes no better |
 | exp_027_flow_convnext | flow | 935,691 (+24 buf) | 20,000 | 3801 | val | **16.0** (.999) / 16.1 (.9993) / 16.3 (.9995) / 20.3 (.9997) | 63.4 (+2.7 extra EMAs) | ConvNeXt blocks, (48, 56, 64), 2/level, expand 4; clean, slightly soft. ~5.4 upd/s shared |
 | exp_029_flow_convnext_deep | flow | 895,491 (+20 buf) | 20,000 | 3801 | val | **16.3** (.999) / 16.7 (.9993) / 17.4 (.9995) / 22.2 (.9997) | 69.2 (+1.3 extra EMAs) | ConvNeXt blocks, (40, 56, 56), 3/level, expand 3; clean, smooth, a little blurrier. ~4.6 upd/s shared |
+| exp_030_flow_precond | flow | 981,651 (+16 buf) | 20,000 | 3801 | val | 19.9 (.999) / **19.5** (.9993) / 19.6 (.9995) / 21.2 (.9997); snapshots .9995: 28.5 @10k, 21.2 @15k | 27.0 (+3.3 extra EMAs/snapshots) | 011 + EDM-style preconditioning; softer, partly washed out / desaturated |
+| exp_031_flow_attn32 | flow | 985,939 (+16 buf) | 20,000 | 3801 | val | 16.9 (.999) / 16.5 (.9993) / **16.1** (.9995) / 16.9 (.9997); snapshots .9995: 24.3 @10k, 17.6 @15k | 33.5 (+1.9 extra EMAs/snapshots) | 011 + attention in the last 32x32 encoder block; clean, sharp, like 011 |
 
 ## Stage 1 smoke test (turn 002, 200 updates each, both concurrently on the MIG slice)
 
@@ -263,6 +265,24 @@ digits. Our 14.4 is model error, not a property of the train/validation split.
   starts lower (first-batch loss 0.80 vs 1.27) but learns more slowly at first; the gap is closing. Not a stop
   signal, but no early evidence of a gain either.
 
+- Turn 010: exp_030_flow_precond and exp_031_flow_attn32 launched together at 00:07 with
+  --snapshots 10000,15000. Snapshot mechanism (analysis only, must not be in the final file): the programs
+  carry an inert hook `SNAPSHOT_AT, SNAPSHOTS = (), {}`; train() copies the primary EMA to CPU when
+  step in SNAPSHOT_AT. Only the runner sets SNAPSHOT_AT (via run.__globals__, flag --snapshots), then scores
+  each snapshot with the same image_score() path as an extra index row tagged snap<step>_ema0.9995. Verified
+  end to end with a fake program in a scratch directory (snapshots at steps 10/15 returned exactly those values).
+- 030 paired losses vs 011 (identical batches): +0.5-1 % at 2k-8k and equal at 20k (0.1803 vs 0.1797), yet KID
+  was much worse. Same mean velocity error, but distributed differently over t and pixels.
+- 031 ran at ~9.5 upd/s next to 030 (alone: 18.8, same as 011). 32x32 attention is cheap alone but
+  contends for memory bandwidth.
+- (a) exp_032_flow_precond_attn32 (030 + 031, 985,955 values) prepared but not to be run: neither helped.
+- (b) exp_033_flow_lean (capacity, because the 10k/15k/20k curve is flattening): 011 recipe with
+  2 decoder blocks per level instead of 3, each taking one encoder-block skip (no input-conv or
+  downsampled-map skips). That frees about 19 % of the parameters, spent on widths (40, 52, 52) instead of
+  (32, 48, 48): 984,731 values. GPU smoke test (200 updates, alone): 20.2 upd/s, 396 MiB, stable, extra EMAs load.
+- Second capacity point exp_034_flow_lean_deep: the same one-skip-per-block decoder used for depth instead of
+  width: 3 encoder + 3 decoder blocks per level, widths (32, 44, 44), 983,759 values (CPU-checked only).
+
 ## Stage conclusions
 
 **Stage 1 (turn 002).** Strong recipe at 20k updates: flow 14.4 (EMA 0.9995) — already below the lecturer's
@@ -324,3 +344,9 @@ on this slice). Block type, layout (013/021/026), optimiser (018/024), regularis
 (012/016/017) have now all tied or lost against exp_011 (14.4), and the real-data floor (-0.02) says the gap is
 model error. The two untried directions are input/output scaling (030, preconditioning) and full-resolution
 attention (031), both on the 011 network at 011's speed.
+
+**Stage 9 (turn 010).** EDM-style preconditioning (030) was clearly worse (19.6, +36 %) at equal training loss,
+with softer, partly washed-out samples. 32x32 attention (031) was worse (16.1, +12 %). Training curve of the
+EMA 0.9995 weights at 10k / 15k / 20k: 030 28.5 / 21.2 / 19.6 and 031 24.3 / 17.6 / 16.1. KID falls about 27 %
+from 10k to 15k but only 7-8 % (~1.5 KID, inside the noise band) from 15k to 20k, so the curve is flattening
+fast: we are mostly capacity/architecture-limited, not budget-limited. Incumbent unchanged: exp_011 (14.4).

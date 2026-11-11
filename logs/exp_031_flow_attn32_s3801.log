@@ -20,3 +20,9 @@
 00:41:09 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "ema0.999", "kid1000": 16.891, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 33.9, "finished": "2026-11-11 00:41:09"}
 00:41:32 KID x 1000: 16.462
 00:41:32 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "ema0.9993", "kid1000": 16.462, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 34.3, "finished": "2026-11-11 00:41:32"}
+00:41:56 KID x 1000: 16.897
+00:41:56 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "ema0.9997", "kid1000": 16.897, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 34.6, "finished": "2026-11-11 00:41:56"}
+00:42:20 KID x 1000: 24.333
+00:42:20 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "snap10000_ema0.9995", "kid1000": 24.333, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 35.0, "finished": "2026-11-11 00:42:20"}
+00:42:44 KID x 1000: 17.566
+00:42:44 RESULT {"exp": "exp_031_flow_attn32", "seed": 3801, "split": "validation", "tag": "snap15000_ema0.9995", "kid1000": 17.566, "params": 985939, "buffers": 16, "config": {"task": "flow", "steps": 20000, "batch_size": 64, "learning_rate": 0.001, "weight_decay": 0.0}, "minutes": 35.4, "finished": "2026-11-11 00:42:44"}
